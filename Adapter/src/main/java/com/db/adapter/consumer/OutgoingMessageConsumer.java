@@ -33,7 +33,8 @@ public class OutgoingMessageConsumer {
         this.connectionRegistry = connectionRegistry;
     }
 
-    @KafkaListener(topics = "#{'${kafka.topic.in.all}'.split(',')}", groupId = "${spring.kafka.consumer.group-id}")
+    @KafkaListener(id = "${spring.kafka.consumer.listener-id}", topics = "#{'${kafka.topic.in.all}'.split(',')}", groupId = "${spring.kafka.consumer.group-id}",
+    containerFactory = "${spring.kafka.consumer.containerFactory}", autoStartup = "${spring.kafka.consumer.autoStartup}")
     public void listenGroup(String message) throws JsonProcessingException {
         JsonNode jsonNode = objectMapper.readTree(message);
         String xmlMessage = xmlMapper.writeValueAsString(jsonNode).replace("ObjectNode", "Message");
