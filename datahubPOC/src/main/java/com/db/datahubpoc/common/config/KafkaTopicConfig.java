@@ -7,20 +7,19 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.core.KafkaAdmin;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Configuration
 public class KafkaTopicConfig {
 
-    @Value(value="${kafka.topic.incoming}")
-    private String incomingTopic;
-
     @Value(value="${spring.kafka.bootstrap-servers}")
     private String bootstrapAddress;
 
-    @Value(value="${kafka.topic.outgoing}")
-    private String outgoingTopic;
+    @Value(value="${kafka.topic.all}")
+    private String topicNames;
 
     @Bean
     public KafkaAdmin kafkaAdmin(){
@@ -31,12 +30,17 @@ public class KafkaTopicConfig {
     }
 
     @Bean
-    public NewTopic incomingTopic(){
-        return new NewTopic(incomingTopic, 1, (short) 1);
-    }
-
-    @Bean
-    public NewTopic outgoingTopic(){
-        return new NewTopic(outgoingTopic, 1, (short) 1);
+    public List<NewTopic> createKafkaTopics() {
+        List<NewTopic> topics = new ArrayList<>();
+        if (topicNames != null && !topicNames.trim().isEmpty()) {
+            String[] names = topicNames.split(",");
+            for (String name : names) {
+                String trimmedName = name.trim();
+                if (!trimmedName.isEmpty()) {
+                    topics.add(new NewTopic(trimmedName, 1, (short)1));
+                }
+            }
+        }
+        return topics;
     }
 }
