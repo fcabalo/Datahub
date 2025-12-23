@@ -37,7 +37,7 @@ public class OutgoingMessageConsumer {
     containerFactory = "${spring.kafka.consumer.containerFactory}", autoStartup = "${spring.kafka.consumer.autoStartup}")
     public void listenGroup(String message) throws JsonProcessingException {
         JsonNode jsonNode = objectMapper.readTree(message);
-        String xmlMessage = xmlMapper.writeValueAsString(jsonNode).replace("ObjectNode", "Message");
+        String xmlMessage = xmlMapper.writeValueAsString(jsonNode).replace("ObjectNode", "DatahubMessage");
 
 
         Optional<String> connectionId = connectionRegistry.currentClient();
@@ -45,10 +45,14 @@ public class OutgoingMessageConsumer {
             System.out.println("No TCP client connected yet. Connect one and try again.");
         }
 
-        Message<String> msg = MessageBuilder.withPayload(xmlMessage).
+        Message<String> msg = MessageBuilder.withPayload(addLength(xmlMessage)).
                 setHeader(IpHeaders.CONNECTION_ID, connectionId.get()).
                 build();
         toTcp.send(msg);
         System.out.println("Message Received and Sent: " + xmlMessage);
+    }
+
+    private static String addLength(String xmlMessage){
+        return String.format("%04d%s", xmlMessage.length(), xmlMessage);
     }
 }

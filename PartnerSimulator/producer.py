@@ -7,8 +7,8 @@ import requests
 from datetime import datetime
 
 def generate_message(template, index):
-	partners = [1,2]
-	formats = ['A','B']
+	partners = [1]
+	formats = ['A']
 	timestamp = datetime.now().timestamp()
 	
 	root = ET.fromstring(template)
