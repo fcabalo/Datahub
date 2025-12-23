@@ -4,18 +4,19 @@ import os
 import random
 import string
 import requests
+from datetime import datetime
 
 def generate_message(template, index):
-	partners = [1, 2]
-	formats = ['A','B','C']
-	rand_string = ''.join(random.choices(string.ascii_letters + string.digits, k=5))
+	partners = [1,2]
+	formats = ['A','B']
+	timestamp = datetime.now().timestamp()
 	
 	root = ET.fromstring(template)
 	
 	replacements = {
 		"partnerId": str(random.choice(partners)),
 		"formatType": str(random.choice(formats)),
-		"body": str(index) + rand_string
+		"body": str(index) + '|' + str(timestamp)
 	}
 	
 	for tag, newValue in replacements.items():
@@ -63,10 +64,11 @@ def main(messageCount, xmlSource):
 	
 	#print(rawTemplate)
 	
-	#print(message)
+	
 	
 	for x in range(int(messageCount)):
 		message = generate_message(rawTemplate, x)
+		print(message)
 		posts = send_message(message)
 		print('Sent:', posts)
 	
