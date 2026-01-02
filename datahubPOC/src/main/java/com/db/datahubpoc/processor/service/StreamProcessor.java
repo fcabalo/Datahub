@@ -38,12 +38,8 @@ public class StreamProcessor {
 
     @Autowired
     void buildPipeline(StreamsBuilder builder){
-        /*KStream<String, String> messageStream = builder.stream(incomingTopic,
-                Consumed.with(STRING_SERDE, STRING_SERDE));
 
-         */
-
-        KStream<String, String> messageStream = builder.stream(incomingTopics,
+        KStream<String, String> messageStream = builder.stream(incomingTopic,
                 Consumed.with(STRING_SERDE, STRING_SERDE));
 
         XmlMapper xmlMapper = new XmlMapper();

@@ -7,18 +7,27 @@ import requests
 from datetime import datetime
 
 def generate_message(template, index):
-	partners = [1]
-	formats = ['A']
+	partners = [1,2]
+	formats = ['A','B']
 	timestamp = datetime.now().timestamp()
 	
 	root = ET.fromstring(template)
 	
-	replacements = {
+	header = root.find('header')
+	
+	headerRep = {
 		"partnerId": str(random.choice(partners)),
-		"formatType": str(random.choice(formats)),
+		"formatType": str(random.choice(formats))
+	}
+	
+	replacements = {
 		"body": str(index) + '|' + str(timestamp)
 	}
 	
+	for tag, newValue in headerRep.items():
+		for elem in header.iter(tag):
+			elem.text = str(newValue)
+			
 	for tag, newValue in replacements.items():
 		for elem in root.iter(tag):
 			elem.text = str(newValue)
@@ -63,7 +72,6 @@ def main(messageCount, xmlSource):
 	rawTemplate = open_template(xmlSource)
 	
 	#print(rawTemplate)
-	
 	
 	
 	for x in range(int(messageCount)):

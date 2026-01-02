@@ -9,26 +9,28 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class DatahubMessage {
-    private Integer partnerId;
-    private String formatType;
+    private Header header;
     private String body;
 
     public String toString(){
-        return "Partner ID: " + this.partnerId
-                + " Format Type: " + this.formatType
+        return "Header: " + this.header.toString()
                 + " Body: " + this.body;
     }
 
     public String toJsonString(){
         return "{" +
-                "\"partnerId\":\"" + this.partnerId + "\"," +
-                "\"formatType\":\"" + this.formatType + "\"," +
+                "\"header\":\"" + this.header.toJsonString() + "\"," +
                 "\"body\":\"" + this.body +
                 "}";
     }
 
     @JsonIgnore
     public String getIncomingTopic(){
-        return "Partner" + partnerId + "Incoming";
+        return "Partner" + this.header.getPartnerId() + "Incoming";
+    }
+
+    @JsonIgnore
+    public String getFormatType(){
+        return this.header.getFormatType();
     }
 }

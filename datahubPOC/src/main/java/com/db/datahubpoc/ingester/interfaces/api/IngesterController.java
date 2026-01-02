@@ -25,6 +25,7 @@ public class IngesterController {
     public DatahubMessage postXMLMessage(@RequestBody DatahubMessage datahubMessage) throws JsonProcessingException {
         String message = xmlMapper.writeValueAsString(datahubMessage);
         kafkaTemplate.send(datahubMessage.getIncomingTopic(), message);
+        kafkaTemplate.send(incomingTopic, message);
         return datahubMessage;
     }
 

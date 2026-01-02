@@ -1,5 +1,7 @@
 <Message>
-	<partnerId>PARTNER</partnerId>
-	<formatType>FORMAT</formatType>
+	<header>
+		<partnerId>PARTNER</partnerId>
+		<formatType>FORMAT</formatType>
+	</header>
 	<body>BODY</body>
 </Message>

@@ -21,7 +21,7 @@ public class KafkaStreamConfig {
     @Value(value="${spring.kafka.bootstrap-servers}")
     private String bootstrapAddress;
 
-    @Value(value="${spring.kafka.stream.app-id")
+    @Value(value="${spring.kafka.stream.app-id}")
     private String appId;
 
     @Bean(name = KafkaStreamsDefaultConfiguration.DEFAULT_STREAMS_CONFIG_BEAN_NAME)
