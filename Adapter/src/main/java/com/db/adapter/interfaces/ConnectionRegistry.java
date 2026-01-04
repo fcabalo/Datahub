@@ -2,50 +2,54 @@ package com.db.adapter.interfaces;
 
 import com.db.adapter.consumer.KafkaListenerControlService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.event.EventListener;
-import org.springframework.integration.ip.IpHeaders;
 import org.springframework.integration.ip.tcp.connection.TcpConnectionCloseEvent;
-import org.springframework.integration.ip.tcp.connection.TcpConnectionOpenEvent;
-import org.springframework.messaging.MessageHeaders;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 @Component
 public class ConnectionRegistry {
 
-    private final AtomicReference<String> currentConnectionId = new AtomicReference<>();
+    private final ConcurrentMap<String, String> clientConnections = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String, Boolean> connectedClients = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String, String> partnerClient = new ConcurrentHashMap<>();
 
     @Autowired
     KafkaListenerControlService kafkaListenerControlService;
 
-    @Value(value="${spring.kafka.consumer.listener-id}")
-    private String listenerId;
-
-    @EventListener
+    /*@EventListener
     public void onOpen(TcpConnectionOpenEvent event) {
         currentConnectionId.set(event.getConnectionId());
         System.out.println("Client connected: " + event.getConnectionId());
         kafkaListenerControlService.startListener(listenerId);
+    }*/
+
+    public boolean hasSignon(String connectionId){
+        return clientConnections.containsKey(connectionId);
     }
 
     @EventListener
     public void onClose(TcpConnectionCloseEvent event) {
-        String id = event.getConnectionId();
-        System.out.println("Client disconnected: " + id);
-        currentConnectionId.compareAndSet(id, null);
-        kafkaListenerControlService.stopListener(listenerId);
+        String connectionId = event.getConnectionId();
+        String partnerId = clientConnections.get(connectionId);
+        connectedClients.remove(connectionId);
+        partnerClient.remove(partnerId);
+
+        System.out.println("Client disconnected: " + partnerId + ": " + connectionId);
+        kafkaListenerControlService.stopListener(partnerId);
     }
 
-    public Optional<String> currentClient() {
-        return Optional.ofNullable(currentConnectionId.get());
+    public Optional<String> getConnectionId(String partnerId) {
+        return Optional.ofNullable(partnerClient.get(partnerId));
     }
 
-    public void printTargetHint(MessageHeaders headers) {
-        Object id = headers.get(IpHeaders.CONNECTION_ID);
-        System.out.println("Sent to connectionId=" + id);
+    public void register(String connectionId, String partnerId){
+        clientConnections.put(connectionId, partnerId);
+        connectedClients.put(connectionId, Boolean.TRUE);
+        partnerClient.put(partnerId, connectionId);
     }
 
 }
