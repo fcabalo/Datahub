@@ -6,9 +6,11 @@ import string
 import requests
 from datetime import datetime
 
-def generate_message(template, index):
-	partners = [1,2]
-	formats = ['A','B']
+def generate_message(template, index, formatType):
+	partners = {1,2}
+	if formatType == '-':
+		formats = {'A','B'}
+		formatType = str(random.choice(list(formats)))
 	timestamp = datetime.now().timestamp()
 	
 	root = ET.fromstring(template)
@@ -16,8 +18,8 @@ def generate_message(template, index):
 	header = root.find('header')
 	
 	headerRep = {
-		"partnerId": str(random.choice(partners)),
-		"formatType": str(random.choice(formats))
+		"partnerId": str(random.choice(list(partners))),
+		"formatType": formatType
 	}
 	
 	replacements = {
@@ -64,7 +66,7 @@ def open_template(input_file):
 	except Exception as e:
 		print(f"An unexpected error occurred: {e}")
 		
-def main(messageCount, xmlSource):
+def main(messageCount, recipient, xmlSource):
 	
 	#print('Count: ', messageCount)
 	#print('Template Source:', xmlSource)
@@ -75,7 +77,7 @@ def main(messageCount, xmlSource):
 	
 	
 	for x in range(int(messageCount)):
-		message = generate_message(rawTemplate, x)
+		message = generate_message(rawTemplate, x, recipient)
 		print(message)
 		posts = send_message(message)
 		print('Sent:', posts)
@@ -89,9 +91,14 @@ if __name__=='__main__':
 		messageCount = 1
 		
 	try:
-		messageTemplate = sys.argv[2]
+		recipient = sys.argv[2]
+	except IndexError:
+		recipient = '-'
+		
+	try:
+		messageTemplate = sys.argv[3]
 	except IndexError:
 		messageTemplate = 'templates/default.xml'	
 	
-	main(messageCount, messageTemplate)
+	main(messageCount, recipient, messageTemplate)
 

@@ -4,6 +4,7 @@ import com.db.adapter.consumer.KafkaListenerControlService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.integration.ip.tcp.connection.TcpConnectionCloseEvent;
+import org.springframework.integration.ip.tcp.connection.TcpConnectionOpenEvent;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
@@ -20,14 +21,13 @@ public class ConnectionRegistry {
     @Autowired
     KafkaListenerControlService kafkaListenerControlService;
 
-    /*@EventListener
+    @EventListener
     public void onOpen(TcpConnectionOpenEvent event) {
-        currentConnectionId.set(event.getConnectionId());
-        System.out.println("Client connected: " + event.getConnectionId());
-        kafkaListenerControlService.startListener(listenerId);
-    }*/
+        System.out.println("Client connecting: " + event.getConnectionId());
+    }
 
     public boolean hasSignon(String connectionId){
+        System.out.println("Checking signon: " + connectionId);
         return clientConnections.containsKey(connectionId);
     }
 
@@ -35,6 +35,7 @@ public class ConnectionRegistry {
     public void onClose(TcpConnectionCloseEvent event) {
         String connectionId = event.getConnectionId();
         String partnerId = clientConnections.get(connectionId);
+        clientConnections.remove(connectionId);
         connectedClients.remove(connectionId);
         partnerClient.remove(partnerId);
 
@@ -50,6 +51,8 @@ public class ConnectionRegistry {
         clientConnections.put(connectionId, partnerId);
         connectedClients.put(connectionId, Boolean.TRUE);
         partnerClient.put(partnerId, connectionId);
+        kafkaListenerControlService.createAndRegisterListener(partnerId, connectionId);
+        System.out.println("Partner: " + partnerId + " -- connection:" + connectionId + " Registered");
     }
 
 }

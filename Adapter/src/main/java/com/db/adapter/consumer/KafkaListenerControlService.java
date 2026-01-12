@@ -1,6 +1,5 @@
 package com.db.adapter.consumer;
 
-import com.db.adapter.common.config.KafkaListenerTemplate;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -8,8 +7,8 @@ import org.springframework.kafka.config.KafkaListenerContainerFactory;
 import org.springframework.kafka.config.KafkaListenerEndpoint;
 import org.springframework.kafka.config.KafkaListenerEndpointRegistry;
 import org.springframework.kafka.config.MethodKafkaListenerEndpoint;
-import org.springframework.kafka.listener.MessageListener;
 import org.springframework.kafka.listener.MessageListenerContainer;
+import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.handler.annotation.support.DefaultMessageHandlerMethodFactory;
 import org.springframework.stereotype.Service;
 
@@ -28,10 +27,13 @@ public class KafkaListenerControlService {
     @Autowired
     private KafkaListenerContainerFactory containerFactory;
 
-    private KafkaListenerEndpoint createKafkaListenerEndpoint(String partnerId) {
+    @Autowired
+    private MessageChannel toTcp;
+
+    private KafkaListenerEndpoint createKafkaListenerEndpoint(String partnerId, String connectionId) {
         MethodKafkaListenerEndpoint<String, String> kafkaListenerEndpoint =
-                createDefaultMethodKafkaListenerEndpoint(topic);
-        kafkaListenerEndpoint.setBean(new KafkaListenerTemplate());
+                createDefaultMethodKafkaListenerEndpoint(partnerId);
+        kafkaListenerEndpoint.setBean(new KafkaListenerTemplate(connectionId, toTcp));
         try {
             kafkaListenerEndpoint.setMethod(KafkaListenerTemplate.class.getMethod("onMessage", ConsumerRecord.class));
         } catch (NoSuchMethodException e) {
@@ -42,36 +44,45 @@ public class KafkaListenerControlService {
 
     private MethodKafkaListenerEndpoint<String, String> createDefaultMethodKafkaListenerEndpoint(String partnerId) {
         MethodKafkaListenerEndpoint<String, String> kafkaListenerEndpoint = new MethodKafkaListenerEndpoint<>();
-        kafkaListenerEndpoint.setId(generateListenerId());
+        kafkaListenerEndpoint.setId(generateListenerId(partnerId));
         kafkaListenerEndpoint.setGroupId(kafkaGroupId);
-        kafkaListenerEndpoint.setAutoStartup(true);
-        kafkaListenerEndpoint.setTopics(topic);
+        kafkaListenerEndpoint.setTopics(getOutgoingTopic(partnerId));
+        kafkaListenerEndpoint.setAutoStartup(false);
         kafkaListenerEndpoint.setMessageHandlerMethodFactory(new DefaultMessageHandlerMethodFactory());
         return kafkaListenerEndpoint;
     }
 
-    public void createAndRegisterListener(String topic) {
-        KafkaListenerEndpoint listener = createKafkaListenerEndpoint(topic);
-        kafkaListenerEndpointRegistry.registerListenerContainer(listener, kafkaListenerContainerFactory, true);
+    public void createAndRegisterListener(String partnerId, String connectionId) {
+        KafkaListenerEndpoint listener = createKafkaListenerEndpoint(partnerId, connectionId);
+        endpointRegistry.registerListenerContainer(listener, containerFactory, true);
     }
 
     public void startListener(String listenerId){
-        MessageListenerContainer listenerContainer = registry.getListenerContainer(listenerId);
+        MessageListenerContainer listenerContainer = endpointRegistry.getListenerContainer(listenerId);
         if(listenerContainer != null && !listenerContainer.isRunning()){
             listenerContainer.start();
         }
     }
 
     public void stopListener(String listenerId){
-        MessageListenerContainer listenerContainer = registry.getListenerContainer(listenerId);
-        if(listenerContainer != null && listenerContainer.isRunning()){
-            listenerContainer.stop();
+        listenerId = kafkaListenerId + listenerId;
+        MessageListenerContainer listenerContainer = endpointRegistry.getListenerContainer(listenerId);
+        if(listenerContainer != null) {
+            if (listenerContainer.isRunning()) {
+                listenerContainer.stop();
+            }
+            endpointRegistry.unregisterListenerContainer(listenerId);
+            listenerContainer.destroy();
         }
     }
 
-    private String generateListenerId(String partnerId){
+    public String generateListenerId(String partnerId){
         return kafkaListenerId + partnerId;
     }
 
-    private String
+    public String getOutgoingTopic(String partnerId) {
+        return "Partner" + partnerId + "Outgoing";
+    }
+
+
 }
