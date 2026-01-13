@@ -17,16 +17,28 @@ def calculateElapsed(xmlData):
 	
 	print(f"Elapsed: {elapsedtime: .4f} seconds")
 	
-def main(messageCount):
+def main(messageCount, partnerId):
 
 	client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	server_address = ('localhost', 9293)
 
 	client_socket.connect(server_address)
+	
+	message = 'PARTNER_ID=' + partnerId + '\r\n'
 
 	print('connected to', server_address )
-
+	
+	
+	
 	try:
+		
+		client_socket.sendall(message.encode('utf-8'))
+		print(message, 'sent')
+	
+		#client_socket.settimeout(5)
+		data = client_socket.recv(1024)
+		receivedData = data.decode()
+		print('Received:', receivedData)
 		
 		counter = messageCount
 		first = True
@@ -52,6 +64,7 @@ def main(messageCount):
 		print('Start: ', start)	
 		print('End: ', end)
 		print('Messages per second: ', messageCount/(end.timestamp() - start.timestamp()))
+	
 
 	finally:
 		client_socket.close()
@@ -60,7 +73,9 @@ if __name__=='__main__':
 	
 	try:
 		messageCount = sys.argv[1]
+		partnerId = sys.argv[2]
 	except IndexError:
 		messageCount = 0
+		partnerId = '0'
 	
-	main(int(messageCount))
+	main(int(messageCount), partnerId)
