@@ -1,6 +1,7 @@
 package com.db.datahubpoc.ingester.interfaces.api;
 
 import com.db.datahubpoc.common.entity.DatahubMessage;
+import com.db.datahubpoc.integration.PartnerInterface;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +10,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("datahub")
@@ -19,12 +22,16 @@ public class IngesterController {
     @Autowired
     private KafkaTemplate<String, String> kafkaTemplate;
 
+    @Autowired
+    private Map<String, PartnerInterface> partnerInterfaces;
+
     private XmlMapper xmlMapper = new XmlMapper();
 
     @PostMapping(path="/", consumes = MediaType.APPLICATION_XML_VALUE, produces = MediaType.APPLICATION_XML_VALUE)
     public DatahubMessage postXMLMessage(@RequestBody DatahubMessage datahubMessage) throws JsonProcessingException {
         String message = xmlMapper.writeValueAsString(datahubMessage);
-        kafkaTemplate.send(datahubMessage.getIncomingTopic(), message);
+        String topic = partnerInterfaces.get(datahubMessage.getHeader().getSource()).getIncomingTopic();
+        kafkaTemplate.send(topic, message);
         kafkaTemplate.send(incomingTopic, message);
         return datahubMessage;
     }

@@ -26,7 +26,7 @@ public class DatahubMessage {
 
     @JsonIgnore
     public String getIncomingTopic(){
-        return "Partner" + this.header.getPartnerId() + "Incoming";
+        return "PI" + this.header.getSource() + "Incoming";
     }
 
     @JsonIgnore

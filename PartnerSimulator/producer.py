@@ -6,11 +6,21 @@ import string
 import requests
 from datetime import datetime
 
-def generate_message(template, index, formatType):
+def generate_message(template, index, recipient):
 	partners = {1,2}
-	if formatType == '-':
-		formats = {'A','B'}
+	formats = {'A','B','C'}
+	
+	source = str(random.choice(list(partners)))
+	destination = None
+	formatType = ''
+	if recipient == '-':
 		formatType = str(random.choice(list(formats)))
+	elif recipient.isdigit():
+		destination = recipient
+		formatType = str(random.choice(list(formats)))
+	else:
+		formatType = recipient
+		
 	timestamp = datetime.now().timestamp()
 	
 	root = ET.fromstring(template)
@@ -18,7 +28,8 @@ def generate_message(template, index, formatType):
 	header = root.find('header')
 	
 	headerRep = {
-		"partnerId": str(random.choice(list(partners))),
+		"source": source,
+		"destination": destination,
 		"formatType": formatType
 	}
 	

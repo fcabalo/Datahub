@@ -1,0 +1,45 @@
+[
+	{
+		"id": "1",
+		"partnerId": "1",
+		"interfaceType": "RESTAPI",
+		"region": "Hesse",
+		"direction": "incoming"
+	},
+	{
+		"id": "2",
+		"partnerId": "2",
+		"direction": "incoming",
+		"interfaceType": "RESTAPI",
+		"region": "Berlin"
+	},
+	{
+		"id": "3",
+		"partnerId": "1",
+		"interfaceType": "TCP/IP",
+		"region": "Hesse",
+		"direction": "outgoing"
+	},
+	{
+		"id": "4",
+		"partnerId": "1",
+		"direction": "outgoing",
+		"interfaceType": "TCP/IP",
+		"region": "Berlin"
+	},
+	{
+		"id": "5",
+		"partnerId": "2",
+		"direction": "outgoing",
+		"interfaceType": "TCP/IP",
+		"region": "Hesse"
+	},
+	{
+		"id": "6",
+		"partnerId": "3",
+		"direction": "outgoing",
+		"interfaceType": "TCP/IP",
+		"region": "Berlin",
+		"live": false
+	}
+]

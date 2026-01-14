@@ -81,7 +81,7 @@ public class KafkaListenerControlService {
     }
 
     public String getOutgoingTopic(String partnerId) {
-        return "Partner" + partnerId + "Outgoing";
+        return "PI" + partnerId + "Outgoing";
     }
 
 
