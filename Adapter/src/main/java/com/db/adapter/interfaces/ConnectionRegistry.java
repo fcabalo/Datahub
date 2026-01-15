@@ -1,6 +1,8 @@
 package com.db.adapter.interfaces;
 
 import com.db.adapter.consumer.KafkaListenerControlService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.integration.ip.tcp.connection.TcpConnectionCloseEvent;
@@ -14,6 +16,8 @@ import java.util.concurrent.ConcurrentMap;
 @Component
 public class ConnectionRegistry {
 
+    private static final Logger log = LoggerFactory.getLogger(ConnectionRegistry.class);
+
     private final ConcurrentMap<String, String> clientConnections = new ConcurrentHashMap<>();
     private final ConcurrentMap<String, Boolean> connectedClients = new ConcurrentHashMap<>();
     private final ConcurrentMap<String, String> partnerClient = new ConcurrentHashMap<>();
@@ -23,11 +27,11 @@ public class ConnectionRegistry {
 
     @EventListener
     public void onOpen(TcpConnectionOpenEvent event) {
-        System.out.println("Client connecting: " + event.getConnectionId());
+        log.info("Client connecting: {}", event.getConnectionId());
     }
 
     public boolean hasSignon(String connectionId){
-        System.out.println("Checking signon: " + connectionId);
+        log.info("Checking sign-on: {}", connectionId);
         return clientConnections.containsKey(connectionId);
     }
 
@@ -39,7 +43,7 @@ public class ConnectionRegistry {
         connectedClients.remove(connectionId);
         partnerClient.remove(partnerId);
 
-        System.out.println("Client disconnected: " + partnerId + ": " + connectionId);
+        log.info("Client disconnected: {}: {}", partnerId, connectionId);
         kafkaListenerControlService.stopListener(partnerId);
     }
 
@@ -52,7 +56,8 @@ public class ConnectionRegistry {
         connectedClients.put(connectionId, Boolean.TRUE);
         partnerClient.put(partnerId, connectionId);
         kafkaListenerControlService.createAndRegisterListener(partnerId, connectionId);
-        System.out.println("Partner: " + partnerId + " -- connection:" + connectionId + " Registered");
+
+        log.info("Partner: {} -- connection: {} Registered", partnerId, connectionId);
     }
 
 }

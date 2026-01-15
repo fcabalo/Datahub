@@ -9,6 +9,8 @@ import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.kstream.Branched;
 import org.apache.kafka.streams.kstream.Consumed;
 import org.apache.kafka.streams.kstream.KStream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -18,8 +20,10 @@ import java.util.List;
 
 @Component
 public class StreamProcessor {
-    private static final Serde<String> STRING_SERDE = Serdes.String();
 
+    private static final Logger log = LoggerFactory.getLogger(StreamProcessor.class);
+
+    private static final Serde<String> STRING_SERDE = Serdes.String();
 
     @Value(value="${kafka.topic.incoming}")
     private String incomingTopic;
@@ -38,6 +42,8 @@ public class StreamProcessor {
 
     @Autowired
     void buildPipeline(StreamsBuilder builder){
+        log.info("Building Kafka Streams pipeline: incomingTopic={}", incomingTopic);
+        log.debug("Outgoing topics configured: outgoing1={}, outgoing2={}", outgoing1, outgoing2);
 
         KStream<String, String> messageStream = builder.stream(incomingTopic,
                 Consumed.with(STRING_SERDE, STRING_SERDE));
@@ -49,11 +55,18 @@ public class StreamProcessor {
                 value -> {
                     try{
                         if(value.startsWith("<")){
+                            log.debug("Converting XML message to JSON");
+                            log.debug("Converted message to JSON string: {}",
+                                    objectMapper.writeValueAsString(xmlMapper.readValue(value, DatahubMessage.class)));
                             return objectMapper.writeValueAsString(xmlMapper.readValue(value, DatahubMessage.class));
                         }else{
+                            log.debug("Message already in JSON format, passing through");
+
                             return value;
                         }
                     } catch (JsonProcessingException e){
+                        log.error("Failed to process message: {}", e.getMessage(), e);
+
                         throw new RuntimeException(e);
                     }
                 }).split()
@@ -62,5 +75,7 @@ public class StreamProcessor {
                 .branch((key, value) -> "B".equals(objectMapper.readValue(value, DatahubMessage.class).getFormatType()),
                         Branched.withConsumer((ks) -> ks.to(outgoing2)) )
                 .noDefaultBranch();
+
+        log.info("Kafka Streams pipeline built successfully");
     }
 }
