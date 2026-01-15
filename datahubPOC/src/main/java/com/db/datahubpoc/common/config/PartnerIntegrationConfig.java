@@ -26,7 +26,7 @@ public class PartnerIntegrationConfig {
 
     private static final Logger log = LoggerFactory.getLogger(PartnerIntegrationConfig.class);
 
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Value(value="${data.source.partnerInterface}")
     private String partnerInterfaceSource;
@@ -52,7 +52,7 @@ public class PartnerIntegrationConfig {
 
     @Bean
     @DependsOn("partners")
-    public Map<String, PartnerInterface> partnerInterfaces(){
+    public Map<Integer, PartnerInterface> partnerInterfaces(){
         log.info("Loading partner interfaces from {}", partnerInterfaceSource);
 
         TypeReference<List<PartnerInterface>> jacksonTypeReference = new TypeReference<List<PartnerInterface>>() {};
@@ -73,7 +73,7 @@ public class PartnerIntegrationConfig {
         TypeReference<List<RoutingCriteria>> jacksonTypeReference = new TypeReference<List<RoutingCriteria>>() {};
         InputStream is = PartnerIntegrationConfig.class.getResourceAsStream(routingCriteriaSource);
         List<RoutingCriteria> routingCriteria = objectMapper.readValue(is, jacksonTypeReference);
-        
+
         routingCriteria.forEach(rc -> log.info("{}", rc));
 
         log.info("Loaded {} routing criteria", routingCriteria.size());

@@ -7,25 +7,35 @@ import lombok.NoArgsConstructor;
 
 @Data
 public class PartnerInterface {
-    String id;
-    String partnerId;
-    String interfaceType;
+    Integer id;
+    Integer partnerId;
+    InterfaceType interfaceType;
+    String formatType;
+    String topicName;
     String region;
     String ipAddress;
-    String port;
+    Integer port;
     String endpoint;
-    String direction;
-    Boolean live;
+    Direction direction;
+    Status status;
 
     public PartnerInterface(){
-        live = true;
+        status = Status.LIVE;
     }
 
-    public String getIncomingTopic(){
-        return "PI" + id + "Incoming";
+    public String getTopicName(){
+        return "PI" + id + (direction.equals(Direction.INCOMING) ? "Incoming" : "Outgoing");
     }
 
-    public String getOutgoingTopic(){
-        return "PI" + id + "Outgoing";
+    public enum Direction{
+        INCOMING, OUTGOING;
+    }
+
+    public enum InterfaceType{
+        TCPIP, RESTAPI, SOAP, DEFAULT;
+    }
+
+    public enum Status{
+        LIVE, STANDBY, INACTIVE
     }
 }

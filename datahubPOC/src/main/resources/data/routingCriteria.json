@@ -1,23 +1,28 @@
 [
 	{
-		"id": "1",
-		"partnerInterfaceId": "3",
-		"partnerId": "1",
-		"formatType": "A"
+		"id": 1,
+		"partnerInterfaceId": 4,
+		"partnerId": 2,
+		"messageTypeOp": "EQUALS",
+		"messageType": "A"
 		
 	},
 	{
-		"id": "2",
-		"partnerInterfaceId": "4",
-		"partnerId": "1",
-		"formatType": "B"
+		"id": 2,
+		"partnerInterfaceId": 5,
+		"partnerId": 2,
+		"messageTypeOp": "NOT_EQUALS",
+		"messageType": "A"
 	},
 	{
-		"id": "3",
-		"partnerInterfaceId": "5",
+		"id": 3,
+		"partnerInterfaceId": 7,
+		"recipientRegionOp": "EQUALS",
 		"recipientRegion": "Hesse"
 	},
 	{
-		"partnerInterfaceId": "6"
+		"partnerInterfaceId": 8,
+		"messageTypeOp": "IN",
+		"messageType": "A,B"
 	}
 ]

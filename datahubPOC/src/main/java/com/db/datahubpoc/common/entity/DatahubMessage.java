@@ -23,14 +23,4 @@ public class DatahubMessage {
                 "\"body\":\"" + this.body +
                 "}";
     }
-
-    @JsonIgnore
-    public String getIncomingTopic(){
-        return "PI" + this.header.getSource() + "Incoming";
-    }
-
-    @JsonIgnore
-    public String getFormatType(){
-        return this.header.getFormatType();
-    }
 }

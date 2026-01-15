@@ -29,8 +29,6 @@ public class KafkaTopicConfig {
     @Value(value="${kafka.topic.incoming}")
     private String incomingTopic;
 
-    @Value(value="${kafka.topic.deadletter}")
-    private String deadLetter;
 
     @Bean
     public KafkaAdmin kafkaAdmin() {
@@ -44,25 +42,17 @@ public class KafkaTopicConfig {
 
     @Bean
     @DependsOn("partnerInterfaces")
-    public KafkaAdmin.NewTopics createKafkaTopics(Map<String, PartnerInterface> partnerInterfaces) {
+    public KafkaAdmin.NewTopics createKafkaTopics(Map<Integer, PartnerInterface> partnerInterfaces) {
         log.info("Creating Kafka topics for {} partner interfaces", partnerInterfaces.size());
 
         List<NewTopic> topics = new ArrayList<>();
         topics.add(new NewTopic(incomingTopic, 1, (short)1));
         log.info("Topic created: {}", incomingTopic);
-
-        topics.add(new NewTopic(deadLetter, 1, (short)1));
-        log.info("Topic created: {}", deadLetter);
-
         partnerInterfaces
                 .forEach((p, v) ->{
-                            if(v.getDirection().equals("incoming")){
-                                topics.add(TopicBuilder.name("PI" + p + "Incoming").partitions(1).replicas(1).build());
-                                log.info("Topic created: PI{}Incoming", p);
-                            } else{
-                                topics.add(TopicBuilder.name("PI" + p + "Outgoing").partitions(1).replicas(1).build());
-                                log.info("Topic created: PI{}Outgoing", p);
-                            }
+                            String topicName = v.getTopicName();
+                            topics.add(TopicBuilder.name(topicName).partitions(1).replicas(1).build());
+                            log.info("Topic: {} created", topicName);
                         }
                 );
 

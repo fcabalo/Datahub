@@ -9,17 +9,17 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Header {
-    private String source;
-    private String destination;
+    private Integer source;
+    private Integer destination;
     private String region;
-    private String formatType;
+    private String messageType;
 
     public String toJsonString(){
         return "{" +
                 "\"source\":\"" + this.source + "\"," +
                 "\"destination\":\"" + this.destination + "\"," +
                 "\"region\":\"" + this.region + "\"," +
-                "\"formatType\":\"" + this.formatType + "\"," +
+                "\"messageType\":\"" + this.messageType + "\"," +
                 "}";
     }
 
@@ -27,6 +27,6 @@ public class Header {
         return "source: " + this.source
                 + " destination: " + this.destination
                 + " region: " + this.region
-                + " formatType: " + this.formatType;
+                + " messageType: " + this.messageType;
     }
 }
