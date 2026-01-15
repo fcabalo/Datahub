@@ -1,6 +1,7 @@
 package com.db.datahubpoc.ingester.interfaces.api;
 
 import com.db.datahubpoc.common.entity.DatahubMessage;
+import com.db.datahubpoc.integration.PartnerInterface;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import org.slf4j.Logger;
@@ -11,6 +12,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("datahub")
@@ -24,6 +27,9 @@ public class IngesterController {
     @Autowired
     private KafkaTemplate<String, String> kafkaTemplate;
 
+    @Autowired
+    private Map<String, PartnerInterface> partnerInterfaces;
+
     private XmlMapper xmlMapper = new XmlMapper();
 
     @PostMapping(path="/", consumes = MediaType.APPLICATION_XML_VALUE, produces = MediaType.APPLICATION_XML_VALUE)
@@ -31,7 +37,9 @@ public class IngesterController {
         log.info("Received XML message for topic={}", datahubMessage.getIncomingTopic());
 
         String message = xmlMapper.writeValueAsString(datahubMessage);
-        kafkaTemplate.send(datahubMessage.getIncomingTopic(), message);
+        String topic = partnerInterfaces.get(datahubMessage.getHeader().getSource()).getIncomingTopic();
+
+        kafkaTemplate.send(topic, message);
         log.debug("Sent message to partner topic={}", datahubMessage.getIncomingTopic());
 
         kafkaTemplate.send(incomingTopic, message);

@@ -1,5 +1,7 @@
 package com.db.datahubpoc.common.config;
 
+import com.db.datahubpoc.integration.Partner;
+import com.db.datahubpoc.integration.PartnerInterface;
 import org.apache.kafka.clients.admin.AdminClientConfig;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.slf4j.Logger;
@@ -7,6 +9,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.DependsOn;
+import org.springframework.kafka.config.TopicBuilder;
 import org.springframework.kafka.core.KafkaAdmin;
 
 import java.util.ArrayList;
@@ -22,11 +26,14 @@ public class KafkaTopicConfig {
     @Value(value="${spring.kafka.bootstrap-servers}")
     private String bootstrapAddress;
 
-    @Value(value="${kafka.topic.all}")
-    private String topicNames;
+    @Value(value="${kafka.topic.incoming}")
+    private String incomingTopic;
+
+    @Value(value="${kafka.topic.deadletter}")
+    private String deadLetter;
 
     @Bean
-    public KafkaAdmin kafkaAdmin(){
+    public KafkaAdmin kafkaAdmin() {
         log.info("Creating Kafka admin client: bootstrapServers={}", bootstrapAddress);
 
         Map<String, Object> config = new HashMap<>();
@@ -36,24 +43,30 @@ public class KafkaTopicConfig {
     }
 
     @Bean
-    public List<NewTopic> createKafkaTopics() {
-        log.info("Initializing Kafka topics from configuration");
+    @DependsOn("partnerInterfaces")
+    public KafkaAdmin.NewTopics createKafkaTopics(Map<String, PartnerInterface> partnerInterfaces) {
+        log.info("Creating Kafka topics for {} partner interfaces", partnerInterfaces.size());
 
         List<NewTopic> topics = new ArrayList<>();
-        if (topicNames != null && !topicNames.trim().isEmpty()) {
-            String[] names = topicNames.split(",");
-            for (String name : names) {
-                String trimmedName = name.trim();
-                if (!trimmedName.isEmpty()) {
-                    topics.add(new NewTopic(trimmedName, 1, (short)1));
-                    log.debug("Configured topic: name={}, partitions=1, replicationFactor=1", trimmedName);
-                }
-            }
-        }
+        topics.add(new NewTopic(incomingTopic, 1, (short)1));
+        log.info("Topic created: {}", incomingTopic);
 
-        log.info("Created {} topic configurations: {}", topics.size(),
-                topics.stream().map(NewTopic::name).toList());
+        topics.add(new NewTopic(deadLetter, 1, (short)1));
+        log.info("Topic created: {}", deadLetter);
 
-        return topics;
+        partnerInterfaces
+                .forEach((p, v) ->{
+                            if(v.getDirection().equals("incoming")){
+                                topics.add(TopicBuilder.name("PI" + p + "Incoming").partitions(1).replicas(1).build());
+                                log.info("Topic created: PI{}Incoming", p);
+                            } else{
+                                topics.add(TopicBuilder.name("PI" + p + "Outgoing").partitions(1).replicas(1).build());
+                                log.info("Topic created: PI{}Outgoing", p);
+                            }
+                        }
+                );
+
+        log.info("Kafka topic creation complete: {} topics created", topics.size());
+        return new KafkaAdmin.NewTopics(topics.toArray(NewTopic[]::new));
     }
 }

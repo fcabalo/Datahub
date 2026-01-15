@@ -1,6 +1,7 @@
 <Message>
 	<header>
-		<partnerId>PARTNER</partnerId>
+		<source>PARTNER1</source>
+		<destination>PARTNER</destination>
 		<formatType>FORMAT</formatType>
 	</header>
 	<body>BODY</body>

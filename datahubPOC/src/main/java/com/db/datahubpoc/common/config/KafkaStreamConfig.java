@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.annotation.EnableKafkaStreams;
 import org.springframework.kafka.annotation.KafkaStreamsDefaultConfiguration;
@@ -29,6 +30,7 @@ public class KafkaStreamConfig {
     private String appId;
 
     @Bean(name = KafkaStreamsDefaultConfiguration.DEFAULT_STREAMS_CONFIG_BEAN_NAME)
+    @DependsOn("createKafkaTopics")
     KafkaStreamsConfiguration kStreamsConfig(){
         log.info("Creating Kafka Streams configuration: appId={}, bootstrapServers={}", appId, bootstrapAddress);
 
