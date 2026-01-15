@@ -8,7 +8,7 @@ import java.util.Date;
 @Data
 @AllArgsConstructor
 public class Partner {
-    String id;
+    Integer id;
     String name;
     String region;
     Date creationDate;

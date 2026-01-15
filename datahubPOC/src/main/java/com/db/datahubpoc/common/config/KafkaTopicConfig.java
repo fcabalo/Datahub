@@ -2,6 +2,7 @@ package com.db.datahubpoc.common.config;
 
 import com.db.datahubpoc.integration.Partner;
 import com.db.datahubpoc.integration.PartnerInterface;
+import lombok.extern.log4j.Log4j2;
 import org.apache.kafka.clients.admin.AdminClientConfig;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,6 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Log4j2
 @Configuration
 public class KafkaTopicConfig {
 
@@ -25,34 +27,24 @@ public class KafkaTopicConfig {
     @Value(value="${kafka.topic.incoming}")
     private String incomingTopic;
 
-    @Value(value="${kafka.topic.deadletter}")
-    private String deadLetter;
-
     @Bean
     public KafkaAdmin kafkaAdmin() {
         Map<String, Object> config = new HashMap<>();
         config.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress);
-
         return new KafkaAdmin(config);
     }
 
     @Bean
     @DependsOn("partnerInterfaces")
-    public KafkaAdmin.NewTopics createKafkaTopics(Map<String, PartnerInterface> partnerInterfaces) {
+    public KafkaAdmin.NewTopics createKafkaTopics(Map<Integer, PartnerInterface> partnerInterfaces) {
         List<NewTopic> topics = new ArrayList<>();
         topics.add(new NewTopic(incomingTopic, 1, (short)1));
-        System.out.println("Topic: "+ incomingTopic + " created");
-        topics.add(new NewTopic(deadLetter, 1, (short)1));
-        System.out.println("Topic: "+ deadLetter + " created");
+        log.info("Topic: {} created", incomingTopic);
         partnerInterfaces
                 .forEach((p, v) ->{
-                            if(v.getDirection().equals("incoming")){
-                                topics.add(TopicBuilder.name("PI" + p + "Incoming").partitions(1).replicas(1).build());
-                                System.out.println("Topic: "+ "PI" + p + "Incoming" + " created");
-                            } else{
-                                topics.add(TopicBuilder.name("PI" + p + "Outgoing").partitions(1).replicas(1).build());
-                                System.out.println("Topic: "+ "PI" + p + "Outgoing" + " created");
-                            }
+                            String topicName = v.getTopicName();
+                            topics.add(TopicBuilder.name(topicName).partitions(1).replicas(1).build());
+                            log.info("Topic: {} created", topicName);
                         }
                 );
         return new KafkaAdmin.NewTopics(topics.toArray(NewTopic[]::new));

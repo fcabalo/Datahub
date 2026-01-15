@@ -1,18 +1,24 @@
 [
 	{
-		"id": "1",
+		"id": 1,
+		"name": "Default",
+		"region": "Berlin",
+		"creationDate": "2026-01-12"
+	},
+	{
+		"id": 2,
 		"name": "AC Route",
 		"region": "Hesse",
 		"creationDate": "2026-01-12"
 	},
 	{
-		"id": "2",
+		"id": 3,
 		"name": "SPT",
 		"region": "Berlin",
 		"creationDate": "2026-01-12"
 	},
 	{
-		"id": "3",
+		"id": 4,
 		"name": "Live Operations",
 		"region": "Hesse",
 		"creationDate": "2026-01-12"

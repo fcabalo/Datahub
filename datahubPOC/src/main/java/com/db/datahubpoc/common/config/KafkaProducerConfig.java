@@ -1,5 +1,6 @@
 package com.db.datahubpoc.common.config;
 
+import lombok.extern.log4j.Log4j2;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.beans.factory.annotation.Value;
@@ -11,7 +12,6 @@ import org.springframework.kafka.core.ProducerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 @Configuration
 public class KafkaProducerConfig {

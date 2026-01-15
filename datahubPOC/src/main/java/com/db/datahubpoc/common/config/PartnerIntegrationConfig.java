@@ -3,6 +3,9 @@ package com.db.datahubpoc.common.config;
 import com.db.datahubpoc.integration.Partner;
 import com.db.datahubpoc.integration.PartnerInterface;
 import com.db.datahubpoc.integration.RoutingCriteria;
+import lombok.extern.log4j.Log4j2;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,10 +22,11 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+@Log4j2
 @Configuration
 public class PartnerIntegrationConfig {
 
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Value(value="${data.source.partnerInterface}")
     private String partnerInterfaceSource;
@@ -38,17 +42,17 @@ public class PartnerIntegrationConfig {
         TypeReference<List<Partner>> jacksonTypeReference = new TypeReference<List<Partner>>() {};
         InputStream is = PartnerIntegrationConfig.class.getResourceAsStream(partnerSource);
         List<Partner> partners = objectMapper.readValue(is, jacksonTypeReference);
-        partners.forEach(System.out::println);
+        partners.forEach(log::info);
         return partners;
     };
 
     @Bean
     @DependsOn("partners")
-    public Map<String, PartnerInterface> partnerInterfaces(){
+    public Map<Integer, PartnerInterface> partnerInterfaces(){
         TypeReference<List<PartnerInterface>> jacksonTypeReference = new TypeReference<List<PartnerInterface>>() {};
         InputStream is = PartnerIntegrationConfig.class.getResourceAsStream(partnerInterfaceSource);
         List<PartnerInterface> partnerInterfaceList = objectMapper.readValue(is, jacksonTypeReference);
-        partnerInterfaceList.forEach(System.out::println);
+        partnerInterfaceList.forEach(log::info);
         return partnerInterfaceList.stream().collect(Collectors.toConcurrentMap(PartnerInterface::getId, Function.identity()));
     }
 
@@ -58,7 +62,7 @@ public class PartnerIntegrationConfig {
         TypeReference<List<RoutingCriteria>> jacksonTypeReference = new TypeReference<List<RoutingCriteria>>() {};
         InputStream is = PartnerIntegrationConfig.class.getResourceAsStream(routingCriteriaSource);
         List<RoutingCriteria> routingCriteria = objectMapper.readValue(is, jacksonTypeReference);
-        routingCriteria.forEach(System.out::println);
+        routingCriteria.forEach(log::info);
         return routingCriteria;
     }
 }

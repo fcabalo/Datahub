@@ -4,6 +4,7 @@ import com.db.datahubpoc.common.entity.DatahubMessage;
 import com.db.datahubpoc.integration.PartnerInterface;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
+@Log4j2
 @RestController
 @RequestMapping("datahub")
 public class IngesterController {
@@ -23,16 +25,19 @@ public class IngesterController {
     private KafkaTemplate<String, String> kafkaTemplate;
 
     @Autowired
-    private Map<String, PartnerInterface> partnerInterfaces;
+    private Map<Integer, PartnerInterface> partnerInterfaces;
 
     private XmlMapper xmlMapper = new XmlMapper();
 
     @PostMapping(path="/", consumes = MediaType.APPLICATION_XML_VALUE, produces = MediaType.APPLICATION_XML_VALUE)
     public DatahubMessage postXMLMessage(@RequestBody DatahubMessage datahubMessage) throws JsonProcessingException {
         String message = xmlMapper.writeValueAsString(datahubMessage);
-        String topic = partnerInterfaces.get(datahubMessage.getHeader().getSource()).getIncomingTopic();
+        log.info("Message received: {}", message);
+        String topic = partnerInterfaces.get(datahubMessage.getHeader().getSource()).getTopicName();
         kafkaTemplate.send(topic, message);
+        log.info("Message sent to topic {}", topic);
         kafkaTemplate.send(incomingTopic, message);
+        log.info("Message sent to topic {}", incomingTopic);
         return datahubMessage;
     }
 
@@ -44,7 +49,13 @@ public class IngesterController {
 
     @PostMapping(path="/", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public DatahubMessage postJSONMessage(@RequestBody DatahubMessage datahubMessage){
-        kafkaTemplate.send(datahubMessage.getIncomingTopic(), datahubMessage.toJsonString());
+        String topic = partnerInterfaces.get(datahubMessage.getHeader().getSource()).getTopicName();
+        String message = datahubMessage.toJsonString();
+        log.info("Message received: {}", message);
+        kafkaTemplate.send(topic, message);
+        log.info("Message sent to topic {}", topic);
+        kafkaTemplate.send(incomingTopic, message);
+        log.info("Message sent to topic {}", incomingTopic);
         return datahubMessage;
     }
 

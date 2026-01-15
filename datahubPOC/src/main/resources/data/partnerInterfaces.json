@@ -1,45 +1,63 @@
 [
 	{
-		"id": "1",
-		"partnerId": "1",
+		"id": 1,
+		"partnerId": 1,
+		"interfaceType": "DEFAULT",
+		"region": "Berlin",
+		"direction": "INCOMING"
+	},
+	{
+		"id": 2,
+		"partnerId": 1,
+		"interfaceType": "DEFAULT",
+		"region": "Berlin",
+		"direction": "OUTGOING"
+	},
+	{
+		"id": 3,
+		"partnerId": 2,
 		"interfaceType": "RESTAPI",
 		"region": "Hesse",
-		"direction": "incoming"
+		"direction": "INCOMING"
 	},
 	{
-		"id": "2",
-		"partnerId": "2",
-		"direction": "incoming",
-		"interfaceType": "RESTAPI",
-		"region": "Berlin"
-	},
-	{
-		"id": "3",
-		"partnerId": "1",
-		"interfaceType": "TCP/IP",
+		"id": 4,
+		"partnerId": 2,
+		"interfaceType": "TCPIP",
 		"region": "Hesse",
-		"direction": "outgoing"
+		"direction": "OUTGOING",
+		"formatType": "UIC"
 	},
 	{
-		"id": "4",
-		"partnerId": "1",
-		"direction": "outgoing",
-		"interfaceType": "TCP/IP",
-		"region": "Berlin"
-	},
-	{
-		"id": "5",
-		"partnerId": "2",
-		"direction": "outgoing",
-		"interfaceType": "TCP/IP",
+		"id": 5,
+		"partnerId": 2,
+		"direction": "OUTGOING",
+		"interfaceType": "TCPIP",
+		"formatType": "UIC",
 		"region": "Hesse"
 	},
 	{
-		"id": "6",
-		"partnerId": "3",
-		"direction": "outgoing",
-		"interfaceType": "TCP/IP",
+		"id": 6,
+		"partnerId": 3,
+		"interfaceType": "RESTAPI",
 		"region": "Berlin",
-		"live": false
+		"direction": "INCOMING"
+	},
+	{
+		"id": 7,
+		"partnerId": 3,
+		"interfaceType": "TCPIP",
+		"region": "Berlin",
+		"formatType": "UIC",
+		"direction": "OUTGOING"
+	},
+	{
+		"id": 8,
+		"partnerId": 4,
+		"interfaceType": "TCPIP",
+		"region": "Hesse",
+		"formatType": "TAF/TAP",
+		"direction": "OUTGOING",
+		"status": "INACTIVE"
 	}
 ]
