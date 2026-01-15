@@ -1,0 +1,8 @@
+<Message>
+	<header>
+		<source>PARTNER1</source>
+		<destination>PARTNER</destination>
+		<formatType>FORMAT</formatType>
+	</header>
+	<body>BODY</body>
+</Message>

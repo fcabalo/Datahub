@@ -5,6 +5,7 @@ import org.apache.kafka.streams.StreamsConfig;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.annotation.EnableKafkaStreams;
 import org.springframework.kafka.annotation.KafkaStreamsDefaultConfiguration;
@@ -21,10 +22,11 @@ public class KafkaStreamConfig {
     @Value(value="${spring.kafka.bootstrap-servers}")
     private String bootstrapAddress;
 
-    @Value(value="${spring.kafka.stream.app-id")
+    @Value(value="${spring.kafka.stream.app-id}")
     private String appId;
 
     @Bean(name = KafkaStreamsDefaultConfiguration.DEFAULT_STREAMS_CONFIG_BEAN_NAME)
+    @DependsOn("createKafkaTopics")
     KafkaStreamsConfiguration kStreamsConfig(){
         Map<String, Object> config = new HashMap<>();
         config.put(StreamsConfig.APPLICATION_ID_CONFIG, appId);

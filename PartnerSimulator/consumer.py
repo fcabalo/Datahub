@@ -1,21 +1,81 @@
 import socket
+import sys
+from datetime import datetime
+import xml.etree.ElementTree as ET
 
-client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server_address = ('localhost', 9293)
-
-client_socket.connect(server_address)
-
-print('connected to', server_address )
-
-try:
-	message = 'Hello, Server!\r\n'
+def calculateElapsed(xmlData):
 	
-	print(message)
-	#client_socket.sendall(message.encode())
+	root = ET.fromstring(xmlData)
+	body = root.find('body').text
+	data = body.split('|')
 	
-	while True:
+	index = data[0]
+	startTime = float(data[1])
+	
+	end = datetime.now()
+	elapsedtime = end.timestamp() - startTime
+	
+	print(f"Elapsed: {elapsedtime: .4f} seconds")
+	
+def main(messageCount, partnerId):
+
+	client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	server_address = ('localhost', 9293)
+
+	client_socket.connect(server_address)
+	
+	message = 'PARTNER_ID=' + partnerId + '\r\n'
+
+	print('connected to', server_address )
+	
+	
+	
+	try:
+		
+		client_socket.sendall(message.encode('utf-8'))
+		print(message, 'sent')
+	
+		#client_socket.settimeout(5)
 		data = client_socket.recv(1024)
-		print('Received:', data.decode())
+		receivedData = data.decode()
+		print('Received:', receivedData)
+		
+		counter = messageCount
+		first = True
+		
+		while messageCount == 0 or counter > 0:
+			#Added message length in the data sent to read data dynamically 
+			length = client_socket.recv(4, socket.MSG_PEEK)
+			#data + 4 for length header + 2 for terminal \r\n 
+			data = client_socket.recv(int(length) + 6)
+			
+			if first:
+				start = datetime.now()
+				first = False
+			
+			if data:
+				receivedData = data.decode()[4:]
+				print('Received:', receivedData)
+				calculateElapsed(receivedData)
+				
+			counter -= 1
+		
+		end = datetime.now()	
+		print('Start: ', start)	
+		print('End: ', end)
+		print('Messages per second: ', messageCount/(end.timestamp() - start.timestamp()))
+	
 
-finally:
-	client_socket.close()
+	finally:
+		client_socket.close()
+		
+if __name__=='__main__':
+	
+	try:
+		messageCount = sys.argv[1]
+		partnerId = sys.argv[2]
+	except IndexError:
+		messageCount = 0
+		partnerId = '0'
+	
+	main(int(messageCount), partnerId)

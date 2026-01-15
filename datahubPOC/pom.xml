@@ -9,10 +9,10 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.db</groupId>
-    <artifactId>datahubPOC</artifactId>
+    <artifactId>DatahubPOC</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>datahubPOC</name>
-    <description>datahubPOC</description>
+    <name>DatahubPOC</name>
+    <description>DatahubPOC</description>
     <url/>
     <licenses>
         <license/>

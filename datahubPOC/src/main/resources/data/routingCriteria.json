@@ -1,0 +1,23 @@
+[
+	{
+		"id": "1",
+		"partnerInterfaceId": "3",
+		"partnerId": "1",
+		"formatType": "A"
+		
+	},
+	{
+		"id": "2",
+		"partnerInterfaceId": "4",
+		"partnerId": "1",
+		"formatType": "B"
+	},
+	{
+		"id": "3",
+		"partnerInterfaceId": "5",
+		"recipientRegion": "Hesse"
+	},
+	{
+		"partnerInterfaceId": "6"
+	}
+]
