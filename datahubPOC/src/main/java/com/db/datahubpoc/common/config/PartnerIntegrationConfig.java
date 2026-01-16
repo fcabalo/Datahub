@@ -13,11 +13,9 @@ import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
 
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
+
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -44,7 +42,7 @@ public class PartnerIntegrationConfig {
         TypeReference<List<Partner>> jacksonTypeReference = new TypeReference<List<Partner>>() {};
         InputStream is = PartnerIntegrationConfig.class.getResourceAsStream(partnerSource);
         List<Partner> partners = objectMapper.readValue(is, jacksonTypeReference);
-        partners.forEach(p -> log.debug("Loaded partner: {}", p));
+        partners.forEach(p -> log.info("Loaded partner: {}", p));
 
         log.info("Loaded {} partners", partners.size());
         return partners;

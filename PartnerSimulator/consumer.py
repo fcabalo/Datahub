@@ -8,11 +8,10 @@ logging.basicConfig(
 	level=logging.INFO,
 	format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
-log = logging.getLogger(__name__)
+log = logging.getLogger(__name__)					
 
 def calculateElapsed(xmlData):
 	log.debug("Calculating elapsed time from message")
-
 	root = ET.fromstring(xmlData)
 	body = root.find('body').text
 	data = body.split('|')
@@ -22,7 +21,7 @@ def calculateElapsed(xmlData):
 	
 	end = datetime.now()
 	elapsedtime = end.timestamp() - startTime
-
+	
 	log.info("Message %s elapsed: %.4f seconds", index, elapsedtime)
 	
 def main(messageCount, partnerId):
@@ -36,7 +35,7 @@ def main(messageCount, partnerId):
 
 	log.info("Starting TCP client: partnerId=%s, messageCount=%d", partnerId, messageCount)
 	log.debug("Connecting to server at %s:%d", server_address[0], server_address[1])
-
+	
 	try:
 		
 		client_socket.sendall(message.encode('utf-8'))
@@ -49,6 +48,9 @@ def main(messageCount, partnerId):
 		
 		counter = messageCount
 		first = True
+		
+		start = datetime.now()
+		end = datetime.now()
 		
 		while messageCount == 0 or counter > 0:
 			#Added message length in the data sent to read data dynamically 
@@ -66,25 +68,33 @@ def main(messageCount, partnerId):
 				calculateElapsed(receivedData)
 				
 			counter -= 1
+			end = datetime.now()	
 		
-		end = datetime.now()	
+			
 		log.info("Start: %s", start)
 		log.info("End: %s", end)
 		log.info("Messages per second: %s", messageCount / (end.timestamp() - start.timestamp()))
 	
+	except KeyboardInterrupt:
+		log.info("Start: %s", start)
+		log.info("End: %s", end)
+		log.info("Messages per second: %s", messageCount / (end.timestamp() - start.timestamp()))
 
 	finally:
 		client_socket.close()
-		log.debug("Connection closed")
 		
 if __name__=='__main__':
 	
 	try:
-		messageCount = sys.argv[1]
-		partnerId = sys.argv[2]
+		partnerId = sys.argv[1]
+	except IndexError:
+		sys.exit("PartnerId is mandatory")
+		
+	try:
+		messageCount = sys.argv[2]
 	except IndexError:
 		messageCount = 0
-		partnerId = '0'
-
+		
 	log.info("Starting client: messageCount=%s, partnerId=%s", messageCount, partnerId)
+	
 	main(int(messageCount), partnerId)

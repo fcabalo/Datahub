@@ -21,6 +21,7 @@
 		"recipientRegion": "Hesse"
 	},
 	{
+		"id": 4,
 		"partnerInterfaceId": 8,
 		"messageTypeOp": "IN",
 		"messageType": "A,B"
