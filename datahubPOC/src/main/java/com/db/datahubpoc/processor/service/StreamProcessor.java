@@ -110,6 +110,7 @@ public class StreamProcessor {
                 )
                 .map(RoutingCriteria::getPartnerInterfaceId)
                 .map(pi -> partnerInterfaces.get(pi))
+                .filter(pi -> !pi.getStatus().equals(PartnerInterface.Status.INACTIVE))
                 .collect(Collectors.toList());
         if(outgoingPartners.isEmpty()){
             // Add dead-letter topic as default
@@ -137,7 +138,7 @@ public class StreamProcessor {
         switch (pi.getFormatType()){
             case null -> convertedMessage = objectMapper.writeValueAsString(message);
             case "UIC" -> convertedMessage = objectMapper.writeValueAsString(message);
-            case "TAF/TAP" -> convertedMessage = message.toJsonString();
+            case "TAF/TAP" -> convertedMessage = objectMapper.writeValueAsString(message);
             default -> convertedMessage = objectMapper.writeValueAsString(message);
         }
 

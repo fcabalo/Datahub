@@ -19,7 +19,7 @@ public class Header {
                 "\"source\":\"" + this.source + "\"," +
                 "\"destination\":\"" + this.destination + "\"," +
                 "\"region\":\"" + this.region + "\"," +
-                "\"messageType\":\"" + this.messageType + "\"," +
+                "\"messageType\":\"" + this.messageType + "\"" +
                 "}";
     }
 

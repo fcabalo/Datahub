@@ -19,7 +19,7 @@ public class DatahubMessage {
 
     public String toJsonString(){
         return "{" +
-                "\"header\":\"" + this.header.toJsonString() + "\"," +
+                "\"header\":" + this.header.toJsonString() + "," +
                 "\"body\":\"" + this.body +
                 "}";
     }

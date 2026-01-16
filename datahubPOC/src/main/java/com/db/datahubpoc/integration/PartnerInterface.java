@@ -11,7 +11,6 @@ public class PartnerInterface {
     Integer partnerId;
     InterfaceType interfaceType;
     String formatType;
-    String topicName;
     String region;
     String ipAddress;
     Integer port;
@@ -21,6 +20,8 @@ public class PartnerInterface {
 
     public PartnerInterface(){
         status = Status.LIVE;
+        direction = Direction.INCOMING;
+        interfaceType = InterfaceType.RESTAPI;
     }
 
     public String getTopicName(){
