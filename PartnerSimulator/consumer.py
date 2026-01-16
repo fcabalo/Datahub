@@ -24,17 +24,17 @@ def calculateElapsed(xmlData):
 	
 	log.info("Message %s elapsed: %.4f seconds", index, elapsedtime)
 	
-def main(messageCount, partnerId):
+def main(messageCount, partnerId, port):
 
 	client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-	server_address = ('localhost', 9293)
+	server_address = ('localhost', port)
 
 	client_socket.connect(server_address)
 	
 	message = 'PARTNER_ID=' + partnerId + '\r\n'
 
 	log.info("Starting TCP client: partnerId=%s, messageCount=%d", partnerId, messageCount)
-	log.debug("Connecting to server at %s:%d", server_address[0], server_address[1])
+	log.info("Connecting to server at %s:%d", server_address[0], server_address[1])
 	
 	try:
 		
@@ -68,20 +68,16 @@ def main(messageCount, partnerId):
 				calculateElapsed(receivedData)
 				
 			counter -= 1
-			end = datetime.now()	
-		
-			
-		log.info("Start: %s", start)
-		log.info("End: %s", end)
-		log.info("Messages per second: %s", messageCount / (end.timestamp() - start.timestamp()))
+			end = datetime.now()
 	
 	except KeyboardInterrupt:
-		log.info("Start: %s", start)
-		log.info("End: %s", end)
-		log.info("Messages per second: %s", messageCount / (end.timestamp() - start.timestamp()))
+		log.info("Interrupt")
 
 	finally:
 		client_socket.close()
+		log.info("Start: %s", start)
+		log.info("End: %s", end)
+		log.info("Messages per second: %s", messageCount / (end.timestamp() - start.timestamp()))
 		
 if __name__=='__main__':
 	
@@ -89,12 +85,17 @@ if __name__=='__main__':
 		partnerId = sys.argv[1]
 	except IndexError:
 		sys.exit("PartnerId is mandatory")
-		
+	
 	try:
-		messageCount = sys.argv[2]
+		port = sys.argv[2]
+	except IndexError:
+		port = 9293
+	
+	try:
+		messageCount = sys.argv[3]
 	except IndexError:
 		messageCount = 0
 		
 	log.info("Starting client: messageCount=%s, partnerId=%s", messageCount, partnerId)
 	
-	main(int(messageCount), partnerId)
+	main(int(messageCount), partnerId, int(port))
