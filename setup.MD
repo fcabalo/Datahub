@@ -49,7 +49,7 @@ Contains the python script to execute partner functionalities
 		- body (index|timestamp) for metrics. XML messages are sent to DatahubPOC via RestAPI endpoint (http://localhost:8080/datahub/)
 		
 - consumer.py \*partnerId\* \*port\* \*messageCount\*
-	 - *partnerId* (optional, default = 0) - used to set identify the partner when signing-on to the adapter
+	 - *partnerId* (mandatory) - used to set identify the partner when signing-on to the adapter
 	 - *port* (optional, default = 9293) - determines the port on which the partner will connect to using localhost
 	 - *messageCount* (optional, default = 0) - determines how many messages are expected to be received before the simulator terminates. If 0 is set, it will continue to read.
 	 
