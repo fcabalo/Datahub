@@ -113,7 +113,7 @@ public class StreamProcessor {
                 .collect(Collectors.toList());
         if(outgoingPartners.isEmpty()){
             // Add dead-letter topic as default
-            outgoingPartners.add(partnerInterfaces.get(1));
+            outgoingPartners.add(partnerInterfaces.get(2));
         }
 
         return outgoingPartners;
