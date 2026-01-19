@@ -35,6 +35,11 @@ public class ConnectionRegistry {
         return clientConnections.containsKey(connectionId);
     }
 
+    public boolean hasRegistered(String partnerId){
+        log.info("Checking registration: {}", partnerId);
+        return partnerClient.containsKey(partnerId);
+    }
+
     @EventListener
     public void onClose(TcpConnectionCloseEvent event) {
         String connectionId = event.getConnectionId();

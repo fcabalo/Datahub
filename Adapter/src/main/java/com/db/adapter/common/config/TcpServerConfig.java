@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.integration.channel.DirectChannel;
 import org.springframework.integration.channel.QueueChannel;
 import org.springframework.integration.core.GenericTransformer;
@@ -37,6 +38,11 @@ public class TcpServerConfig {
 
     @Bean
     public MessageChannel toTcp(){
+        return new DirectChannel();
+    }
+
+    @Bean
+    public MessageChannel disconnectChannel() {
         return new DirectChannel();
     }
 
@@ -74,6 +80,12 @@ public class TcpServerConfig {
         return null;
     }
 
+    @ServiceActivator(inputChannel = "disconnectChannel")
+    public void closeConnectionByConnectionId(Message message){
+        String connectionId = (String) message.getHeaders().get(IpHeaders.CONNECTION_ID);
+        log.info("Disconnecting connections: {}", connectionId);
+        serverCF().closeConnection(connectionId);
+    }
 
     @Bean
     public IntegrationFlow inboundFlow(AbstractServerConnectionFactory serverFactory,GenericTransformer bytesToString, ConnectionRegistry registry) {
@@ -84,34 +96,52 @@ public class TcpServerConfig {
                 .route(Message.class, msg -> {
                     String connectionId = (String) msg.getHeaders().get(IpHeaders.CONNECTION_ID);
                     boolean hasSignon = registry.hasSignon(connectionId);
-                    log.debug("Routing message for connectionId={}, hasSignon={}", connectionId, hasSignon);
-                    return hasSignon ? "message" : "signon";
+                    log.info("Routing message for connectionId={}, hasSignon={}", connectionId, hasSignon);
+                    if(hasSignon){
+                        return "message";
+                    }
+                    String payload = (String) msg.getPayload();
+                    String partnerId = getPartnerId(payload);
+
+                    if(partnerId != null){
+                        return registry.hasRegistered(partnerId) ? "duplicate" : "signon";
+                    } else {
+                        return "message";
+                    }
                 }, mapping -> mapping
                         .subFlowMapping("signon", flow -> flow
-                                .transform((String payload) -> getPartnerId(payload))
+                                .transform(TcpServerConfig::getPartnerId)
                                 .handle((payload, header) -> {
                                     String connectionId = (String) header.get(IpHeaders.CONNECTION_ID);
                                     String partnerId = (String) payload;
-                                    System.out.println("SIGN-ON PARTNER_ID=" + partnerId);
-                                    if(partnerId != null){
-                                        registry.register(connectionId, partnerId);
-                                        log.info("Sign-on successful: partnerId={}, connectionId={}", partnerId, connectionId);
-                                        return "PARTNER_ID=" + partnerId + " SIGN-ON SUCCESSFUL";
-
-                                    }else{
-                                        log.warn("Sign-on failed: missing PARTNER_ID for connectionId={}", connectionId);
-                                        return "MISSING PARTNER_ID ON SIGN-ON";
-                                    }
+                                    registry.register(connectionId, partnerId);
+                                    log.info("Sign-on successful: partnerId={}, connectionId={}", partnerId, connectionId);
+                                    return "PARTNER_ID=" + partnerId + " SIGN-ON SUCCESSFUL";
                                 })
-                                .channel("toTcp"))
+                                .channel("toTcp")
+                        )
                         .subFlowMapping("message", flow -> flow
                                 .handle((payload, header) -> {
                                     String connectionId = (String) header.get(IpHeaders.CONNECTION_ID);
                                     String partnerId = (String) payload;
-                                    log.debug("Processing message from connectionId={}, payload={}", connectionId, payload);
-                                    return partnerId;
+                                    log.debug("Echoing message from connectionId={}, payload={}", connectionId, payload);
+                                    return "SERVER ECHO: " + partnerId;
                                 })
                                 .channel("toTcp"))
+                        .subFlowMapping("duplicate", flow -> flow
+                                .transform(TcpServerConfig::getPartnerId)
+                                .handle((payload, header) -> {
+                                    String connectionId = (String) header.get(IpHeaders.CONNECTION_ID);
+                                    String partnerId = (String) payload;
+                                    log.info("Duplicate registration: partnerId={}", partnerId);
+                                    return "PARTNER " + partnerId + " already signed-in and connected";
+                                })
+                                .routeToRecipients(r -> r
+                                        .applySequence(true)
+                                        .ignoreSendFailures(true)
+                                        .recipient("toTcp")
+                                        .recipient("disconnectChannel")
+                                ))
                 ).get();
     }
 

@@ -6,6 +6,9 @@ services:
       - 8080:8080
     environment:
       - KAFKA_BOOTSTRAP_SERVERS=broker:29092
+      - LOG_PATH=/usr/logs
+      - LOG_FILENAME=datahub
+      - TZ=${TZ}
     volumes:
       - ./../logs:/usr/logs
 
@@ -16,6 +19,9 @@ services:
       - 9293:9293
     environment:
       - KAFKA_BOOTSTRAP_SERVERS=broker:29092
+      - LOG_PATH=/usr/logs
+      - LOG_FILENAME=adapter_1
+      - TZ=${TZ}
     volumes:
       - ./../logs:/usr/logs
 
@@ -26,5 +32,8 @@ services:
       - 9294:9293
     environment:
       - KAFKA_BOOTSTRAP_SERVERS=broker:29092
+      - LOG_PATH=/usr/logs
+      - LOG_FILENAME=adapter_2
+      - TZ=${TZ}
     volumes:
       - ./../logs:/usr/logs
