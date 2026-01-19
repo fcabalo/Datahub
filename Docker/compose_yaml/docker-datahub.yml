@@ -1,0 +1,30 @@
+services:
+  datahub:
+    image: localhost/datahub-app:latest
+    container_name: datahub
+    ports:
+      - 8080:8080
+    environment:
+      - KAFKA_BOOTSTRAP_SERVERS=broker:29092
+    volumes:
+      - ./../logs:/usr/logs
+
+  adapter_1:
+    image: localhost/adapter-app:latest
+    container_name: adapter1
+    ports:
+      - 9293:9293
+    environment:
+      - KAFKA_BOOTSTRAP_SERVERS=broker:29092
+    volumes:
+      - ./../logs:/usr/logs
+
+  adapter_2:
+    image: localhost/adapter-app:latest
+    container_name: adapter2
+    ports:
+      - 9294:9293
+    environment:
+      - KAFKA_BOOTSTRAP_SERVERS=broker:29092
+    volumes:
+      - ./../logs:/usr/logs
