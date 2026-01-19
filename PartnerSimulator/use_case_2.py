@@ -72,13 +72,37 @@ def main(message_count, source, messageType, destination, batch_size, template_p
     Sends high volume of messages to test throughput and performance.
     Tracks success rate and provides progress updates.
 
-    Args:
-        message_count: Total number of messages to send
-        source: Source partner interface (3 or 6)
-        messageType: Message type (A, B, or C)
-        destination: Target partner ID
-        batch_size: Progress reporting interval
-        template_path: Path to XML template file
+    Usage:
+        python3 use_case_2.py <message_count> [source] [messageType] [destination] [batch_size]
+
+    Arguments:
+        message_count : Number of messages to send (required)
+        source        : Source interface - 3 (Hesse region) or 6 (Berlin region) (default: 6)
+        messageType   : Message type - A, B, or C (default: A)
+        destination   : Target partner - 1, 2, 3, or 4 (default: 2)
+        batch_size    : Progress reporting interval (default: 100)
+
+    Examples:
+        python3 use_case_2.py 1000
+            Sends 1000 Type A messages from source=6 to Partner 2 (no fan-out)
+
+        python3 use_case_2.py 1000 6 A 2 100
+            Sends 1000 Type A messages from source=6 (Berlin) to Partner 2
+            Reports progress every 100 messages
+            Routes to: PI4Outgoing only (no fan-out to Partner 3)
+
+        python3 use_case_2.py 1000 3 A 2 100
+            Sends 1000 Type A messages from source=3 (Hesse) to Partner 2
+            Routes to: PI4Outgoing + PI7Outgoing (fan-out to Partner 2 and Partner 3)
+
+        python3 use_case_2.py 5000 6 B 2 500
+            Sends 5000 Type B messages from source=6 to Partner 2
+            Reports progress every 500 messages
+            Routes to: PI5Outgoing only
+
+    Source Parameter Impact:
+        source=6 -> region=Berlin  -> Avoids RC3 (Partner 3) -> No fan-out
+        source=3 -> region=Hesse   -> Triggers RC3 (Partner 3) -> Fan-out to multiple partners
     """
     log.info("Starting load test")
     log.info("Configuration: messages=%d, source=%d, type=%s, dest=%s, batch=%d",

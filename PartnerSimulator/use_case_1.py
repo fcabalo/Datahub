@@ -88,6 +88,26 @@ def main(message_count, template_path):
 
     Sends messages with different routing characteristics to test fan-out behavior.
     Messages are routed to multiple partners based on messageType and region.
+
+    Usage:
+        python3 use_case_1.py <message_count>
+
+    Arguments:
+        message_count: Number of messages to send (required)
+
+    Examples:
+        python3 use_case_1.py 10
+            Sends 10 messages cycling through 5 different routing patterns
+
+        python3 use_case_1.py 25
+            Sends 25 messages (5 cycles through all patterns)
+
+    Routing Patterns:
+        Pattern 1: source=3, type=A, dest=2  -> Partner 2 (PI4) + Partner 3 (PI7)
+        Pattern 2: source=3, type=B, dest=2  -> Partner 2 (PI5) + Partner 3 (PI7)
+        Pattern 3: source=3, type=C, dest=2  -> Partner 2 (PI5) + Partner 3 (PI7)
+        Pattern 4: source=3, type=A, no dest -> Partner 3 (PI7)
+        Pattern 5: source=6, type=A, dest=2  -> Partner 2 (PI4)
     """
     log.info("Starting broadcast test: message_count=%d", message_count)
 
