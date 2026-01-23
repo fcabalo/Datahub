@@ -9,7 +9,7 @@ services:
       - LOG_PATH=/usr/logs
       - LOG_FILENAME=datahub
     volumes:
-      - ./../logs:/usr/logs
+      - logs:/usr/logs
       - ./../data:/usr/data
 
   adapter-1:
@@ -22,7 +22,7 @@ services:
       - LOG_PATH=/usr/logs
       - LOG_FILENAME=adapter_1
     volumes:
-      - ./../logs:/usr/logs
+      - logs:/usr/logs
       - ./../data:/usr/data
 
   adapter-2:
@@ -35,5 +35,8 @@ services:
       - LOG_PATH=/usr/logs
       - LOG_FILENAME=adapter_2
     volumes:
-      - ./../logs:/usr/logs
+      - logs:/usr/logs
       - ./../data:/usr/data
+      
+volumes:
+  logs:
