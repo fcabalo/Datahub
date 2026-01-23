@@ -51,6 +51,7 @@ public class StreamProcessor {
                 Consumed.with(STRING_SERDE, STRING_SERDE));
 
         XmlMapper xmlMapper = new XmlMapper();
+        ObjectMapper objectMapper = new ObjectMapper();
 
         messageStream.mapValues(
                 value -> {
@@ -60,13 +61,11 @@ public class StreamProcessor {
 
                             DatahubMessage message = xmlMapper.readValue(value, DatahubMessage.class);
                             log.info("Processing message {} from topic {}", message, incomingTopic);
-                            updateMessage(message);
-                            log.info("Updating message {}", message);
                             return message;
                         }else{
                             log.debug("Message already in JSON format, passing through");
-
-                            return value;
+                            DatahubMessage message = objectMapper.readValue(value, DatahubMessage.class);
+                            return message;
                         }
                     } catch (JsonProcessingException e){
                         log.error("Failed to process message: {}", e.getMessage(), e);
@@ -120,13 +119,6 @@ public class StreamProcessor {
         return outgoingPartners;
     }
 
-    /*
-     * To add all default values
-     */
-    private void updateMessage(DatahubMessage message){
-        String region = partnerInterfaces.get(message.getHeader().getSource()).getRegion();
-        message.getHeader().setRegion(region);
-    }
 
     /*
      * Convert messages into outgoing partners expected format

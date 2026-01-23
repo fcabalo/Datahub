@@ -1,0 +1,37 @@
+---
+config:
+  layout: dagre
+title: Stream Processor
+---
+flowchart LR
+    PI3I(("**PartnerInterface 3**
+    (Message Producer)")) -- "XML Message
+    [RestAPI]" --> IS["Ingester Service"]
+    PI6I(("**PartnerInterface 6**
+    (Message Producer)")) -- "XML Message
+    [RestAPI]" --> IS
+    
+    IS -- XML Message 
+    (source 3) --> IT3["PI3Incoming"]
+    IS -- JSON Message --> IT["IncomingTopic"]
+    IS -- XML Message 
+    (source 6) --> IT6["PI6Incoming"]
+    IT -- JSON Message --> TS["Stream Processor"]
+    TS -- JSON Message -->  MR["Message Router"]
+    MR -- JSON Message --> OT4["PI4Outgoing"] & OT5["PI5Outgoing"] & OT7["PI7Outgoing"]
+    OT4 -- JSON Message -->AS1["Adapter Service 1"]
+    OT5 -- JSON Message -->AS1
+    OT7 -- JSON Message -->AS2["Adapter Service 2"]
+    AS1 -- XML Message --> PI4O(("**PartnerInterface 4**
+    (Message Consumer)"))
+    AS1 -- XML Message --> PI5O(("**PartnerInterface 5**
+    (Message Consumer)"))
+    AS2 -- XML Message --> PI7O(("**PartnerInterface 7**
+    (Message Consumer)"))
+    
+    IT@{ shape: das}
+    IT3@{ shape: das}
+    IT6@{ shape: das}
+    OT4@{ shape: das}
+    OT5@{ shape: das}
+    OT7@{ shape: das}

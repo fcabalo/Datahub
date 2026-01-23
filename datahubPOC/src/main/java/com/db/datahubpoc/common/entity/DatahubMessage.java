@@ -16,11 +16,4 @@ public class DatahubMessage {
         return "Header: " + this.header.toString()
                 + " Body: " + this.body;
     }
-
-    public String toJsonString(){
-        return "{" +
-                "\"header\":" + this.header.toJsonString() + "," +
-                "\"body\":\"" + this.body +
-                "}";
-    }
 }

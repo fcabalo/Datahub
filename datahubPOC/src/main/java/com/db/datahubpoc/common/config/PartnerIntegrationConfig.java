@@ -12,6 +12,9 @@ import org.springframework.context.annotation.DependsOn;
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
@@ -35,12 +38,15 @@ public class PartnerIntegrationConfig {
     @Value(value="${data.source.routingCriteria}")
     private String routingCriteriaSource;
 
+    @Value(value="${data.source.path}")
+    private String datasourcePath;
+
     @Bean
-    public List<Partner> partners(){
+    public List<Partner> partners() throws FileNotFoundException {
         log.info("Loading partners from {}", partnerSource);
 
         TypeReference<List<Partner>> jacksonTypeReference = new TypeReference<List<Partner>>() {};
-        InputStream is = PartnerIntegrationConfig.class.getResourceAsStream(partnerSource);
+        InputStream is = new FileInputStream(new File(datasourcePath + partnerSource));
         List<Partner> partners = objectMapper.readValue(is, jacksonTypeReference);
         partners.forEach(p -> log.info("Loaded partner: {}", p));
 
@@ -50,11 +56,11 @@ public class PartnerIntegrationConfig {
 
     @Bean
     @DependsOn("partners")
-    public Map<Integer, PartnerInterface> partnerInterfaces(){
+    public Map<Integer, PartnerInterface> partnerInterfaces() throws FileNotFoundException {
         log.info("Loading partner interfaces from {}", partnerInterfaceSource);
 
         TypeReference<List<PartnerInterface>> jacksonTypeReference = new TypeReference<List<PartnerInterface>>() {};
-        InputStream is = PartnerIntegrationConfig.class.getResourceAsStream(partnerInterfaceSource);
+        InputStream is = new FileInputStream(new File(datasourcePath + partnerInterfaceSource));
         List<PartnerInterface> partnerInterfaceList = objectMapper.readValue(is, jacksonTypeReference);
 
         partnerInterfaceList.forEach(pi -> log.info("{}", pi));
@@ -65,11 +71,11 @@ public class PartnerIntegrationConfig {
 
     @Bean
     @DependsOn("partnerInterfaces")
-    public List<RoutingCriteria> routingCriterias() {
+    public List<RoutingCriteria> routingCriterias() throws FileNotFoundException {
         log.info("Loading routing criteria from {}", routingCriteriaSource);
 
         TypeReference<List<RoutingCriteria>> jacksonTypeReference = new TypeReference<List<RoutingCriteria>>() {};
-        InputStream is = PartnerIntegrationConfig.class.getResourceAsStream(routingCriteriaSource);
+        InputStream is = new FileInputStream(new File(datasourcePath + routingCriteriaSource));
         List<RoutingCriteria> routingCriteria = objectMapper.readValue(is, jacksonTypeReference);
 
         routingCriteria.forEach(rc -> log.info("{}", rc));
