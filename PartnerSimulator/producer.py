@@ -66,7 +66,7 @@ def generate_message(template, index, msgType, recipient):
 	
 def send_message(xmlMessage):
 	headers = {'Content-Type': 'application/xml'}
-	url = 'http://localhost:8080/datahub/'
+	url = 'http://localhost:8080/datahub'
 	
 	log.debug("Sending message to %s", url)									
 	try:

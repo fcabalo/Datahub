@@ -8,6 +8,7 @@ services:
       - KAFKA_BOOTSTRAP_SERVERS=broker:29092
       - LOG_PATH=/usr/logs
       - LOG_FILENAME=datahub
+      - SERVER_PORT=8080
     volumes:
       - logs:/usr/logs
       - ./../data:/usr/data
@@ -17,10 +18,12 @@ services:
     container_name: adapter-app-1
     ports:
       - 9293:9293
+      - 8180:8180
     environment:
       - KAFKA_BOOTSTRAP_SERVERS=broker:29092
       - LOG_PATH=/usr/logs
       - LOG_FILENAME=adapter_1
+      - METRICS_PORT=8180
     volumes:
       - logs:/usr/logs
       - ./../data:/usr/data
@@ -30,10 +33,12 @@ services:
     container_name: adapter-app-2
     ports:
       - 9294:9293
+      - 8280:8280
     environment:
       - KAFKA_BOOTSTRAP_SERVERS=broker:29092
       - LOG_PATH=/usr/logs
       - LOG_FILENAME=adapter_2
+      - METRICS_PORT=8280
     volumes:
       - logs:/usr/logs
       - ./../data:/usr/data

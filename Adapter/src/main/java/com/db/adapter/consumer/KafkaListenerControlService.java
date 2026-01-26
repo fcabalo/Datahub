@@ -1,5 +1,6 @@
 package com.db.adapter.consumer;
 
+import com.db.adapter.monitoring.OutgoingMessageMetric;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,12 +35,15 @@ public class KafkaListenerControlService {
     @Autowired
     private MessageChannel toTcp;
 
+    @Autowired
+    private OutgoingMessageMetric outgoingMessageMetric;
+
     private KafkaListenerEndpoint createKafkaListenerEndpoint(String partnerId, String connectionId) {
         log.info("Creating Kafka listener endpoint for partnerId={}, connectionId={}", partnerId, connectionId);
 
         MethodKafkaListenerEndpoint<String, String> kafkaListenerEndpoint =
                 createDefaultMethodKafkaListenerEndpoint(partnerId);
-        kafkaListenerEndpoint.setBean(new KafkaListenerTemplate(connectionId, toTcp));
+        kafkaListenerEndpoint.setBean(new KafkaListenerTemplate(connectionId, toTcp, outgoingMessageMetric, partnerId));
         try {
             kafkaListenerEndpoint.setMethod(KafkaListenerTemplate.class.getMethod("onMessage", ConsumerRecord.class));
         } catch (NoSuchMethodException e) {

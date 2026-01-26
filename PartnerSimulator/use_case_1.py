@@ -68,7 +68,7 @@ def generate_message(template, source, messageType, destination, index):
 def send_message(xml_message):
     """Send message to datahub ingestion endpoint."""
     headers = {'Content-Type': 'application/xml'}
-    url = 'http://localhost:8080/datahub/'
+    url = 'http://localhost:8080/datahub'
 
     try:
         response = requests.post(url=url, data=xml_message, headers=headers)

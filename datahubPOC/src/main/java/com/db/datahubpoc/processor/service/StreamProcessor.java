@@ -5,6 +5,7 @@ import com.db.datahubpoc.integration.PartnerInterface;
 import com.db.datahubpoc.integration.RoutingCriteria;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import io.micrometer.core.annotation.Timed;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.StreamsBuilder;
@@ -43,6 +44,7 @@ public class StreamProcessor {
     private String incomingTopic;
 
     @Autowired
+    @Timed("stream.processor.time")
     @DependsOn("createKafkaTopics")
     void buildPipeline(StreamsBuilder builder){
         log.info("Building Kafka Streams pipeline: incomingTopic={}", incomingTopic);
@@ -84,6 +86,7 @@ public class StreamProcessor {
         log.info("Kafka Streams pipeline built successfully");
     }
 
+    @Timed("routing.processor.time")
     private List<PartnerInterface> getOutgoingPartnerInterfaces(DatahubMessage message){
         List<PartnerInterface> outgoingPartners = routingCriteria.stream()
                 .filter(rc -> rc.getPartnerId() == null
@@ -123,6 +126,7 @@ public class StreamProcessor {
     /*
      * Convert messages into outgoing partners expected format
      */
+    @Timed("conversion.process.time")
     private String convertMessage(DatahubMessage message, PartnerInterface pi){
         String convertedMessage;
         ObjectMapper objectMapper = new ObjectMapper();
