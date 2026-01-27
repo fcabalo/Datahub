@@ -17,10 +17,10 @@ scrape_configs:
     scrape_interval: 5s
     metrics_path: '/actuator/prometheus'
     static_configs:
-      - targets: ['host.docker.internal:8080','172.17.32.1:8080','datahub-app:8080']
+      - targets: ['172.17.32.1:8080','datahub-app:8080']
 
   - job_name: 'adapter-app'
     scrape_interval: 5s
     metrics_path: '/actuator/prometheus'
     static_configs:
-      - targets: ['host.docker.internal:8180','172.17.32.1:8180','172.17.32.1:8280','adapter-1:8180','adapter-2:8280']
+      - targets: ['172.17.32.1:8180','172.17.32.1:8280','adapter-1:8180','adapter-2:8280']

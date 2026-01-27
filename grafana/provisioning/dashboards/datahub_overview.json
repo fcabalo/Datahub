@@ -18,7 +18,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 0,
+  "id": 1,
   "links": [],
   "panels": [
     {
@@ -217,7 +217,7 @@
           "expr": "datahub_routing_time_seconds_sum/datahub_routing_time_seconds_count",
           "hide": false,
           "instant": false,
-          "legendFormat": "ingester_average",
+          "legendFormat": "routing_average",
           "range": true,
           "refId": "D"
         },
@@ -303,7 +303,7 @@
         {
           "editorMode": "code",
           "expr": "adapter_connected_clients",
-          "legendFormat": "__auto",
+          "legendFormat": "{{instance}}",
           "range": true,
           "refId": "A"
         }
@@ -328,10 +328,6 @@
               {
                 "color": "green",
                 "value": 0
-              },
-              {
-                "color": "red",
-                "value": 80
               }
             ]
           }
@@ -366,7 +362,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "adapter_message_sent_count_total",
+          "expr": "sum by (partner_interface_id) (adapter_message_sent_count_total)",
           "legendFormat": "PI {{partner_interface_id}}",
           "range": true,
           "refId": "A"
@@ -390,5 +386,5 @@
   "timezone": "browser",
   "title": "Datahub Overview",
   "uid": "ad8lbjh",
-  "version": 5
+  "version": 1
 }
