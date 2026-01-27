@@ -21,7 +21,7 @@ public class MessageProcessingService {
     @Autowired
     private List<RoutingCriteria> routingCriteria;
 
-    @Timed("routing.processor.time")
+    @Timed("datahub.routing.time")
     public List<PartnerInterface> getOutgoingPartnerInterfaces(DatahubMessage message){
         List<PartnerInterface> outgoingPartners = routingCriteria.stream()
                 .filter(rc -> rc.getPartnerId() == null
@@ -57,7 +57,7 @@ public class MessageProcessingService {
         return outgoingPartners;
     }
 
-    @Timed("conversion.process.time")
+    @Timed("datahub.conversion.time")
     public String convertMessage(DatahubMessage message, PartnerInterface pi){
         String convertedMessage;
         ObjectMapper objectMapper = new ObjectMapper();

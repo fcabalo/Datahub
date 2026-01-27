@@ -45,7 +45,7 @@ public class IngesterController {
     private MessageProcessingMetricsService messageProcessingMetricsService;
 
     @PostMapping(path="", consumes = MediaType.APPLICATION_XML_VALUE, produces = MediaType.APPLICATION_XML_VALUE)
-    @Timed(value = "ingester.timer", description = "Time taken for postXMLMessage")
+    @Timed(value = "ingester.time", description = "Time taken for postXMLMessage")
     public DatahubMessage postXMLMessage(@RequestBody DatahubMessage datahubMessage) throws JsonProcessingException {
         String message = xmlMapper.writeValueAsString(datahubMessage);
         log.info("Message received: {}", message);
@@ -77,7 +77,7 @@ public class IngesterController {
     }
 
     @PostMapping(path="", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @Timed(value = "ingester.timer", description = "Time taken for postXMLMessage")
+    @Timed(value = "ingester.time", description = "Time taken for postXMLMessage")
     public DatahubMessage postJSONMessage(@RequestBody DatahubMessage datahubMessage) throws JsonProcessingException {
         Integer source = datahubMessage.getHeader().getSource();
         String topic = partnerInterfaces.get(source).getTopicName();
@@ -95,8 +95,10 @@ public class IngesterController {
 
     @GetMapping("")
     @Timed(value = "test_timer", description = "Time taken for testing")
-    public ResponseEntity<String> showWelcome(){
+    public ResponseEntity<String> showWelcome() throws InterruptedException{
         log.debug("Welcome endpoint accessed");
+
+        Thread.sleep(1000L);
 
         return ResponseEntity.ok().body("<h1>Welcome Datahub POC</h1>");
     }
@@ -111,4 +113,6 @@ public class IngesterController {
     private String generateKey(Integer sourceId) {
         return String.format("%04d%s", sourceId, Long.toString(currTime.incrementAndGet()).substring(1));
     }
+
+
 }

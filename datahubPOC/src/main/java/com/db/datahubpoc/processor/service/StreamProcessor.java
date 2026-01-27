@@ -18,12 +18,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import tools.jackson.databind.ObjectMapper;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
-@Component
+@Service
 public class StreamProcessor {
 
     private static final Logger log = LoggerFactory.getLogger(StreamProcessor.class);
@@ -46,7 +48,6 @@ public class StreamProcessor {
     private String incomingTopic;
 
     @Autowired
-    @Timed("stream.processor.time")
     @DependsOn("createKafkaTopics")
     void buildPipeline(StreamsBuilder builder){
         log.info("Building Kafka Streams pipeline: incomingTopic={}", incomingTopic);
