@@ -45,7 +45,7 @@ public class IngesterController {
     private MessageProcessingMetricsService messageProcessingMetricsService;
 
     @PostMapping(path="", consumes = MediaType.APPLICATION_XML_VALUE, produces = MediaType.APPLICATION_XML_VALUE)
-    @Timed(value = "ingester.timer", description = "Time taken for postXMLMessage")
+    @Timed(value = "ingester.time", description = "Time taken for postXMLMessage")
     public DatahubMessage postXMLMessage(@RequestBody DatahubMessage datahubMessage) throws JsonProcessingException {
         String message = xmlMapper.writeValueAsString(datahubMessage);
         log.info("Message received: {}", message);
@@ -77,7 +77,7 @@ public class IngesterController {
     }
 
     @PostMapping(path="", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @Timed(value = "ingester.timer", description = "Time taken for postXMLMessage")
+    @Timed(value = "ingester.time", description = "Time taken for postXMLMessage")
     public DatahubMessage postJSONMessage(@RequestBody DatahubMessage datahubMessage) throws JsonProcessingException {
         Integer source = datahubMessage.getHeader().getSource();
         String topic = partnerInterfaces.get(source).getTopicName();

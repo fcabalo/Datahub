@@ -178,7 +178,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "ingester_timer_seconds_max",
+          "expr": "ingester_time_seconds_max",
           "legendFormat": "ingester_max",
           "range": true,
           "refId": "A"
@@ -189,12 +189,62 @@
             "uid": "P1809F7CD0C75ACF3"
           },
           "editorMode": "code",
-          "expr": "ingester_timer_seconds_sum/ingester_timer_seconds_count",
+          "expr": "ingester_time_seconds_sum/ingester_time_seconds_count",
           "hide": false,
           "instant": false,
           "legendFormat": "ingester_average",
           "range": true,
           "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "P1809F7CD0C75ACF3"
+          },
+          "editorMode": "code",
+          "expr": "datahub_routing_time_seconds_max",
+          "hide": false,
+          "legendFormat": "routing_max",
+          "range": true,
+          "refId": "C"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "P1809F7CD0C75ACF3"
+          },
+          "editorMode": "code",
+          "expr": "datahub_routing_time_seconds_sum/datahub_routing_time_seconds_count",
+          "hide": false,
+          "instant": false,
+          "legendFormat": "ingester_average",
+          "range": true,
+          "refId": "D"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "P1809F7CD0C75ACF3"
+          },
+          "editorMode": "code",
+          "expr": "datahub_conversion_time_seconds_max",
+          "hide": false,
+          "legendFormat": "conversion_max",
+          "range": true,
+          "refId": "E"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "P1809F7CD0C75ACF3"
+          },
+          "editorMode": "code",
+          "expr": "datahub_conversion_time_seconds_sum/datahub_conversion_time_seconds_count",
+          "hide": false,
+          "instant": false,
+          "legendFormat": "conversion_average",
+          "range": true,
+          "refId": "F"
         }
       ],
       "title": "Processing Time",
@@ -333,12 +383,12 @@
     "list": []
   },
   "time": {
-    "from": "now-1h",
+    "from": "now-30m",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "browser",
   "title": "Datahub Overview",
   "uid": "ad8lbjh",
-  "version": 3
+  "version": 5
 }
