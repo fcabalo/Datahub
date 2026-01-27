@@ -21,6 +21,6 @@ public class OutgoingMessageMetric {
     }
 
     public void incrementMessageSent(String parterInterfaceId){
-        sentMessagesCounter.withTag("partner.interface.id", parterInterfaceId);
+        sentMessagesCounter.withTag("partner.interface.id", parterInterfaceId).increment();
     }
 }

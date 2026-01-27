@@ -95,8 +95,10 @@ public class IngesterController {
 
     @GetMapping("")
     @Timed(value = "test_timer", description = "Time taken for testing")
-    public ResponseEntity<String> showWelcome(){
+    public ResponseEntity<String> showWelcome() throws InterruptedException{
         log.debug("Welcome endpoint accessed");
+
+        Thread.sleep(1000L);
 
         return ResponseEntity.ok().body("<h1>Welcome Datahub POC</h1>");
     }
@@ -111,4 +113,6 @@ public class IngesterController {
     private String generateKey(Integer sourceId) {
         return String.format("%04d%s", sourceId, Long.toString(currTime.incrementAndGet()).substring(1));
     }
+
+
 }

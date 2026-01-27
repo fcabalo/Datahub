@@ -3,9 +3,13 @@ package com.db.datahubpoc.processor.service;
 import com.db.datahubpoc.common.entity.DatahubMessage;
 import com.db.datahubpoc.integration.PartnerInterface;
 import com.db.datahubpoc.integration.RoutingCriteria;
+import com.db.datahubpoc.monitoring.MessageProcessingMetricsService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import io.micrometer.core.annotation.Timed;
+import io.micrometer.core.instrument.Meter;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Timer;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.StreamsBuilder;
@@ -18,13 +22,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import tools.jackson.databind.ObjectMapper;
 
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@Component
+@Service
 public class StreamProcessor {
 
     private static final Logger log = LoggerFactory.getLogger(StreamProcessor.class);
@@ -44,7 +49,6 @@ public class StreamProcessor {
     private String incomingTopic;
 
     @Autowired
-    @Timed("stream.processor.time")
     @DependsOn("createKafkaTopics")
     void buildPipeline(StreamsBuilder builder){
         log.info("Building Kafka Streams pipeline: incomingTopic={}", incomingTopic);
@@ -76,6 +80,7 @@ public class StreamProcessor {
                     }
                 })
                 .foreach((key, value) -> {
+
                     getOutgoingPartnerInterfaces((DatahubMessage) value)
                             .forEach(pi -> {
                                         String convertedMessage = convertMessage((DatahubMessage) value,pi);
