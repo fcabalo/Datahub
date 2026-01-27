@@ -5,6 +5,7 @@ import com.db.datahubpoc.integration.PartnerInterface;
 import com.db.datahubpoc.integration.RoutingCriteria;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import io.micrometer.core.annotation.Timed;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.StreamsBuilder;
@@ -21,7 +22,6 @@ import tools.jackson.databind.ObjectMapper;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Component
 public class StreamProcessor {
@@ -39,10 +39,14 @@ public class StreamProcessor {
     @Autowired
     private List<RoutingCriteria> routingCriteria;
 
+    @Autowired
+    private MessageProcessingService messageProcessingService;
+
     @Value(value="${kafka.topic.incoming}")
     private String incomingTopic;
 
     @Autowired
+    @Timed("stream.processor.time")
     @DependsOn("createKafkaTopics")
     void buildPipeline(StreamsBuilder builder){
         log.info("Building Kafka Streams pipeline: incomingTopic={}", incomingTopic);
@@ -74,66 +78,13 @@ public class StreamProcessor {
                     }
                 })
                 .foreach((key, value) -> {
-                    getOutgoingPartnerInterfaces((DatahubMessage) value)
+                    messageProcessingService.getOutgoingPartnerInterfaces((DatahubMessage) value)
                             .forEach(pi -> {
-                                        String convertedMessage = convertMessage((DatahubMessage) value,pi);
+                                        String convertedMessage = messageProcessingService.convertMessage((DatahubMessage) value,pi);
                                         kafkaTemplate.send(pi.getTopicName(), key, convertedMessage);
                                         log.info("Sending to topic [{}] message {}", pi.getTopicName(), convertedMessage);
                                     });
                 });
         log.info("Kafka Streams pipeline built successfully");
-    }
-
-    private List<PartnerInterface> getOutgoingPartnerInterfaces(DatahubMessage message){
-        List<PartnerInterface> outgoingPartners = routingCriteria.stream()
-                .filter(rc -> rc.getPartnerId() == null
-                        || (message.getHeader().getDestination() != null  && rc.getPartnerId().equals(message.getHeader().getDestination())))
-                .filter(rc -> {
-                    return switch(rc.getRecipientRegionOp()){
-                        case null -> true;
-                        case EQUALS -> rc.getRecipientRegion().equals(message.getHeader().getRegion());
-                        case NOT_EQUALS -> !rc.getRecipientRegion().equals(message.getHeader().getRegion());
-                        case IN -> rc.getRecipientRegion().contains(message.getHeader().getRegion());
-                        case NOT_IN -> !rc.getRecipientRegion().contains(message.getHeader().getRegion());
-                    };
-                })
-                .filter(rc -> {
-                            return switch(rc.getMessageTypeOp()){
-                                case null -> true;
-                                case EQUALS -> rc.getMessageType().equals(message.getHeader().getMessageType());
-                                case NOT_EQUALS -> !rc.getMessageType().equals(message.getHeader().getMessageType());
-                                case IN -> rc.getMessageType().contains(message.getHeader().getMessageType());
-                                case NOT_IN -> !rc.getMessageType().contains(message.getHeader().getMessageType());
-                            };
-                        }
-                )
-                .map(RoutingCriteria::getPartnerInterfaceId)
-                .map(pi -> partnerInterfaces.get(pi))
-                .filter(pi -> !pi.getStatus().equals(PartnerInterface.Status.INACTIVE))
-                .collect(Collectors.toList());
-        if(outgoingPartners.isEmpty()){
-            // Add dead-letter topic as default
-            outgoingPartners.add(partnerInterfaces.get(2));
-        }
-
-        return outgoingPartners;
-    }
-
-
-    /*
-     * Convert messages into outgoing partners expected format
-     */
-    private String convertMessage(DatahubMessage message, PartnerInterface pi){
-        String convertedMessage;
-        ObjectMapper objectMapper = new ObjectMapper();
-
-        switch (pi.getFormatType()){
-            case null -> convertedMessage = objectMapper.writeValueAsString(message);
-            case "UIC" -> convertedMessage = objectMapper.writeValueAsString(message);
-            case "TAF/TAP" -> convertedMessage = objectMapper.writeValueAsString(message);
-            default -> convertedMessage = objectMapper.writeValueAsString(message);
-        }
-
-        return convertedMessage;
     }
 }

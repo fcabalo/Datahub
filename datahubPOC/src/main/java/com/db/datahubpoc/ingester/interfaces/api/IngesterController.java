@@ -2,9 +2,11 @@ package com.db.datahubpoc.ingester.interfaces.api;
 
 import com.db.datahubpoc.common.entity.DatahubMessage;
 import com.db.datahubpoc.integration.PartnerInterface;
+import com.db.datahubpoc.monitoring.MessageProcessingMetricsService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import io.micrometer.core.annotation.Timed;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +21,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
 @RestController
-@RequestMapping("datahub")
+@RequestMapping("/datahub")
 public class IngesterController {
 
     private static final Logger log = LoggerFactory.getLogger(IngesterController.class);
@@ -39,7 +41,11 @@ public class IngesterController {
 
     private XmlMapper xmlMapper = new XmlMapper();
 
-    @PostMapping(path="/", consumes = MediaType.APPLICATION_XML_VALUE, produces = MediaType.APPLICATION_XML_VALUE)
+    @Autowired
+    private MessageProcessingMetricsService messageProcessingMetricsService;
+
+    @PostMapping(path="", consumes = MediaType.APPLICATION_XML_VALUE, produces = MediaType.APPLICATION_XML_VALUE)
+    @Timed(value = "ingester.timer", description = "Time taken for postXMLMessage")
     public DatahubMessage postXMLMessage(@RequestBody DatahubMessage datahubMessage) throws JsonProcessingException {
         String message = xmlMapper.writeValueAsString(datahubMessage);
         log.info("Message received: {}", message);
@@ -55,11 +61,11 @@ public class IngesterController {
         log.info("Message sent to topic {}", incomingTopic);
 
         log.info("XML message processed successfully");
-
+        messageProcessingMetricsService.incrementMessageType(datahubMessage.getHeader().getMessageType());
         return datahubMessage;
     }
 
-    @PostMapping(path="/")
+    @PostMapping(path="")
     public String postMessage(@RequestBody String message){
         log.info("Received raw message, length={}", message.length());
 
@@ -70,7 +76,8 @@ public class IngesterController {
         return message;
     }
 
-    @PostMapping(path="/", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(path="", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Timed(value = "ingester.timer", description = "Time taken for postXMLMessage")
     public DatahubMessage postJSONMessage(@RequestBody DatahubMessage datahubMessage) throws JsonProcessingException {
         Integer source = datahubMessage.getHeader().getSource();
         String topic = partnerInterfaces.get(source).getTopicName();
@@ -82,10 +89,12 @@ public class IngesterController {
         updateMessage(datahubMessage);
         kafkaTemplate.send(incomingTopic, key, objectMapper.writeValueAsString(datahubMessage));
         log.info("Message sent to topic {}", incomingTopic);
+        messageProcessingMetricsService.incrementMessageType(datahubMessage.getHeader().getMessageType());
         return datahubMessage;
     }
 
-    @GetMapping("/")
+    @GetMapping("")
+    @Timed(value = "test_timer", description = "Time taken for testing")
     public ResponseEntity<String> showWelcome(){
         log.debug("Welcome endpoint accessed");
 

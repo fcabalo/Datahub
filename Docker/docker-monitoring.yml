@@ -9,11 +9,15 @@ services:
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
     restart: unless-stopped
+    extra_hosts:
+    - "host.docker.internal:host-gateway"
       
   grafana:
     image: grafana/grafana-enterprise
     container_name: grafana
     restart: unless-stopped
+    extra_hosts:
+    - "host.docker.internal:host-gateway"
     ports:
       - '3000:3000'
     environment:

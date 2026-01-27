@@ -1,5 +1,6 @@
 package com.db.adapter.consumer;
 
+import com.db.adapter.monitoring.OutgoingMessageMetric;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -23,9 +24,14 @@ public class KafkaListenerTemplate implements MessageListener {
     private final XmlMapper xmlMapper = new XmlMapper();
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    public KafkaListenerTemplate(String connectionId, MessageChannel toTcp){
+    private final OutgoingMessageMetric outgoingMessageMetric;
+    private final String partnerId;
+
+    public KafkaListenerTemplate(String connectionId, MessageChannel toTcp, OutgoingMessageMetric outgoingMessageMetric, String partnerId){
         this.connectionId = connectionId;
         this.toTcp = toTcp;
+        this.outgoingMessageMetric = outgoingMessageMetric;
+        this.partnerId = partnerId;
 
         log.info("Initialized KafkaListenerTemplate with connectionId={}", connectionId);
     }
@@ -51,6 +57,7 @@ public class KafkaListenerTemplate implements MessageListener {
                 setHeader(IpHeaders.CONNECTION_ID, connectionId).
                 build();
         toTcp.send(msg);
+        outgoingMessageMetric.incrementMessageSent(this.partnerId);
 
         log.info("Message sent to TCP client. connectionId={}, messageLength={}",
                 connectionId, xmlMessage.length());
