@@ -1,0 +1,21 @@
+dp="podman"
+if [ -x "$(command -v docker)" ]; then
+	dp="docker"
+elif [ -x "$(command -v podman)" ]; then
+	dp="podman"
+else
+	echo "Error: docker or podman is not installed."
+	exit 1
+fi
+
+cd ../DatahubPOC
+echo "Packaging DatahubPOC"
+./mvnw clean package
+echo "Building datahub-app image"
+$dp build -t datahub-app .
+
+cd ../Adapter
+echo "Packaging Adapter"
+./mvnw clean package
+echo "Building adapter-app image"
+$dp build -t adapter-app .

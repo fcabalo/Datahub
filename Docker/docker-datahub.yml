@@ -1,6 +1,6 @@
 services:
   datahub-app:
-    image: docker.io/fcabalo/datahub-app:latest
+    image: datahub-app:latest
     container_name: datahub-app
     ports:
       - 8080:8080
@@ -14,7 +14,7 @@ services:
       - ./../data:/usr/data
 
   adapter-1:
-    image: docker.io/fcabalo/adapter-app:latest
+    image: adapter-app:latest
     container_name: adapter-app-1
     ports:
       - 9293:9293
