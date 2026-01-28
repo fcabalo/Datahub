@@ -1,4 +1,5 @@
 
+
 # Datahub POC
 
 # Pre-requisites
@@ -18,14 +19,22 @@
 **Docker/compose_yaml**  -  docker compose yaml file to setup all dependency containers
 **data** 	-  contains json configuration for setting up partners, interfaces, and routing criteria.
 **grafana** - contains the grafana provisioning files to setup datasource and dashboard
+**scripts** - contains scripts to build images
 
 ## Installation Setup
 Clone this repository or download the repository as zip and extract all in a folder.
 
+### Quick Installation
+
+Execute install.sh or install.bat
+After kafka and monitoring containers are started, it will ask for Datahub setup
+- **Docker/Podman** - datahub-app and adapter-app images will be created; and datahub-app, adapter-1, and adapter-2 containers will start.
+- **Local** - Datahub and Adapter will start on host machine
+
 ### Kafka 
 Go to Docker path and execute the command to setup kafka components
 
-	"docker-compose -f .\docker-kafka.yml up -d"
+	docker-compose -f .\docker-kafka.yml up -d
 	
 Confirm all services are running
 
@@ -33,27 +42,34 @@ Confirm all services are running
 - **kakfa-ui** - exposed to host using port 18080
 
 ### DatahubPOC and Adapter
+
+#### Docker/Podman 
+Go to scripts and run **buildImage** to build datahub-app and adapter-app images.
+
+	./buildImage
 Go to Docker path and execute the command to setup Datahub and Adapter applications as containers
 
-	"docker-compose -f .\docker-datahub.yml up -d"
+	docker-compose -f .\docker-datahub.yml up -d
 Confirm all services are running
 -   **datahub-app**  - exposed to host using port 8080
 -   **adapter-1** - exposed to host using port 9293
 -   **adapter-2** - exposed to host using port 9294
 
 ***OR***
+
+#### Local
 Go to DatahubPOC path and execute the command to start the SpringBoot application for Datahub
 
-	"./mvnw spring-boot:run"
+	./mvnw spring-boot:run
 Go to Adapter path and execute the command to start the SpringBoot application for Adapter
 
-	"./mvnw spring-boot:run"
+	./mvnw spring-boot:run
 
 ### Partner Simulators
 Go to PartnerSimulator path and execute the command to start the simulators
 - **Producer**
 
-		"producer.py [messageCount] [messageType] [destination]"
+		producer.py [messageCount] [messageType] [destination]
 	
 	- *messageCount* (optional, default = 1) - determines the number of XML messages that will be created
 	- *messageType* (optional, default = -) - determines the message type to be set on the message header. If - is provided as value it will randomly pick from values: A,B,C
@@ -61,10 +77,20 @@ Go to PartnerSimulator path and execute the command to start the simulators
 
 - **Consumer**
 
-		"producer.py [partnerId] [port] [messageCount]"
+		producer.py [partnerId] [port] [messageCount]
 	- *partnerId* (optional, default = 0) - used to set identify the partner when signing-on to the adapter
 	 - *port* (optional, default = 9293) - determines the port on which the partner will connect to using localhost
 	 - *messageCount* (optional, default = 0) - determines how many messages are expected to be received before the simulator terminates. If 0 is set, it will continue to read.
+
+### Prometheus and Grafana
+Go to Docker path and execute the command to setup monitoring components
+
+	docker-compose -f .\docker-monitoring.yml up -d
+	
+Confirm all services are running
+
+- **prometheus** - exposed to host using port 9090
+- **grafana** - exposed to host using port 3000
 
 ## Components
 
@@ -86,6 +112,15 @@ Parameters are loaded from data
 
 ### Adapter
 Springboot application that creates the server to which partner consumer can connect to. It contains a kafka listener that reads messages from outgoing topics (e.g. **PI4Outgoing** and **PI5Outgoing**), and transforms the messages into XML format, and sends it to the connected consumer partner.
+
+### Prometheus
+monitoring tool that collects real-time metrics data of the following components: kafka, datahub-app, adapter-app, and prometheus itself. it captures how much CPU or memory is being used, how many messages are received, processed, and sent out from kafka. Configuration is in Docker/prometheus.yml
+
+### Grafana
+dashboard tool that takes data from prometheus and shows it in the form of charts and dashboards. Configuration is in grafana directory
+#### Dashboards
+- Kafka Overview
+- Datahub Overview
 
 ### Partner Simulators
 
