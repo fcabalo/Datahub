@@ -1,3 +1,5 @@
+@echo off
+
 set dp=podman
 where podman
 if %ERRORLEVEL%==0 (

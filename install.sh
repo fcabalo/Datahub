@@ -12,7 +12,7 @@ echo "Installing monitoring components(prometheus and grafana)"
 docker-compose -f docker-monitoring.yml up -d
 
 echo "Select Datahub Setup"
-select option in "Docker/Podman" "Local"
+select option in "Docker/Podman" "Local" "Exit"
 do
     case $option in
         "Docker/Podman")
@@ -33,6 +33,8 @@ do
 			echo "Starting Adapter"
 			nohup ./mvnw spring-boot:run &
 			
+			break;;
+		"Exit")
 			break;;
         *)
 			echo "Choose only from the 2 options";

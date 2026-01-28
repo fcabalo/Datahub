@@ -18,7 +18,8 @@ docker-compose -f docker-monitoring.yml up -d
 echo Select Datahub Setup: 
 echo [1] Docker/Podman 
 echo [2] Local
-set /p choice=Enter your choice (1/2): 
+echo [3] Exit
+set /p choice=Enter your choice (1-3): 
 
 if "%choice%"=="" (
     echo "Invalid input."
@@ -27,6 +28,7 @@ if "%choice%"=="" (
 
 if "%choice%"=="1" goto docker
 if "%choice%"=="2" goto local
+if "%choice%"=="3" exit
 
 :docker
 	cd ../scripts
