@@ -110,11 +110,11 @@ python3 use_case_1.py 25
 ### Consumer Setup
 
 ```bash
-# Terminal 1: Consumer for Partner 2
-python3 consumer.py 2 9293 10
+# Terminal 1: Consumer for Partner 2 Type A (Interface ID 4)
+python3 consumer.py 4 9293 10
 
-# Terminal 2: Consumer for Partner 3
-python3 consumer.py 3 9293 10
+# Terminal 2: Consumer for Partner 3 (Interface ID 7)
+python3 consumer.py 7 9293 10
 
 # Terminal 3: Run test
 python3 use_case_1.py 10
@@ -229,8 +229,8 @@ python3 use_case_2.py 5000 6 B 2 500
 #### No Fan-out Test
 
 ```bash
-# Terminal 1: Consumer for Partner 2
-python3 consumer.py 2 9293 1000
+# Terminal 1: Consumer for Partner 2 Type A (Interface ID 4)
+python3 consumer.py 4 9293 1000
 
 # Terminal 2: Send messages
 python3 use_case_2.py 1000 6 A 2 100
@@ -239,11 +239,11 @@ python3 use_case_2.py 1000 6 A 2 100
 #### Fan-out Test
 
 ```bash
-# Terminal 1: Consumer for Partner 2
-python3 consumer.py 2 9293 1000
+# Terminal 1: Consumer for Partner 2 Type A (Interface ID 4)
+python3 consumer.py 4 9293 1000
 
-# Terminal 2: Consumer for Partner 3
-python3 consumer.py 3 9293 1000
+# Terminal 2: Consumer for Partner 3 (Interface ID 7)
+python3 consumer.py 7 9293 1000
 
 # Terminal 3: Send messages
 python3 use_case_2.py 1000 3 A 2 100
@@ -257,43 +257,47 @@ python3 use_case_2.py 1000 3 A 2 100
 
 #### Type A Messages
 
-| Source | Destination | Region | Routes To | Partners | Consumer Commands |
-|--------|-------------|--------|-----------|----------|-------------------|
-| 3 | 2 | Hesse | PI4, PI7 | 2, 3 | PARTNER_ID=2, PARTNER_ID=3 |
-| 3 | null | Hesse | PI7 | 3 | PARTNER_ID=3 |
-| 6 | 2 | Berlin | PI4 | 2 | PARTNER_ID=2 |
-| 6 | null | Berlin | PI2 | 1 | PARTNER_ID=1 |
+| Source | Destination | Region | Routes To | Partners | Consumer Commands (use Interface ID!) |
+|--------|-------------|--------|-----------|----------|---------------------------------------|
+| 3 | 2 | Hesse | PI4, PI7 | 2, 3 | PARTNER_ID=4, PARTNER_ID=7 |
+| 3 | null | Hesse | PI7 | 3 | PARTNER_ID=7 |
+| 6 | 2 | Berlin | PI4 | 2 | PARTNER_ID=4 |
+| 6 | null | Berlin | PI2 | 1 | PARTNER_ID=2 |
 
 #### Type B Messages
 
-| Source | Destination | Region | Routes To | Partners | Consumer Commands |
-|--------|-------------|--------|-----------|----------|-------------------|
-| 3 | 2 | Hesse | PI5, PI7 | 2, 3 | PARTNER_ID=2, PARTNER_ID=3 |
-| 3 | null | Hesse | PI7 | 3 | PARTNER_ID=3 |
-| 6 | 2 | Berlin | PI5 | 2 | PARTNER_ID=2 |
-| 6 | null | Berlin | PI2 | 1 | PARTNER_ID=1 |
+| Source | Destination | Region | Routes To | Partners | Consumer Commands (use Interface ID!) |
+|--------|-------------|--------|-----------|----------|---------------------------------------|
+| 3 | 2 | Hesse | PI5, PI7 | 2, 3 | PARTNER_ID=5, PARTNER_ID=7 |
+| 3 | null | Hesse | PI7 | 3 | PARTNER_ID=7 |
+| 6 | 2 | Berlin | PI5 | 2 | PARTNER_ID=5 |
+| 6 | null | Berlin | PI2 | 1 | PARTNER_ID=2 |
 
 #### Type C Messages
 
-| Source | Destination | Region | Routes To | Partners | Consumer Commands |
-|--------|-------------|--------|-----------|----------|-------------------|
-| 3 | 2 | Hesse | PI5, PI7 | 2, 3 | PARTNER_ID=2, PARTNER_ID=3 |
-| 3 | null | Hesse | PI7 | 3 | PARTNER_ID=3 |
-| 6 | 2 | Berlin | PI5 | 2 | PARTNER_ID=2 |
-| 6 | null | Berlin | PI2 | 1 | PARTNER_ID=1 |
+| Source | Destination | Region | Routes To | Partners | Consumer Commands (use Interface ID!) |
+|--------|-------------|--------|-----------|----------|---------------------------------------|
+| 3 | 2 | Hesse | PI5, PI7 | 2, 3 | PARTNER_ID=5, PARTNER_ID=7 |
+| 3 | null | Hesse | PI7 | 3 | PARTNER_ID=7 |
+| 6 | 2 | Berlin | PI5 | 2 | PARTNER_ID=5 |
+| 6 | null | Berlin | PI2 | 1 | PARTNER_ID=2 |
 
 ---
 
 ## Consumer Commands Reference
 
+IMPORTANT: The consumer.py PARTNER_ID parameter must match the INTERFACE ID, not the Partner ID!
+The adapter uses the formula: PI{PARTNER_ID}Outgoing to determine which Kafka topic to consume.
+
 ### By Partner
 
-| Partner | Partner ID | Receives From | Consumer Command |
-|---------|-----------|---------------|------------------|
-| Default | 1 | PI2Outgoing | python3 consumer.py 1 9293 COUNT |
-| AC Route | 2 | PI4Outgoing + PI5Outgoing | python3 consumer.py 2 9293 COUNT |
-| SPT | 3 | PI7Outgoing | python3 consumer.py 3 9293 COUNT |
-| Live Operations | 4 | PI8Outgoing (INACTIVE) | python3 consumer.py 4 9293 COUNT |
+| Partner Name | Partner ID | Interface ID | Kafka Topic | Consumer Command |
+|--------------|-----------|--------------|-------------|------------------|
+| Default | 1 | 2 | PI2Outgoing | python3 consumer.py 2 9293 COUNT |
+| AC Route (Type A) | 2 | 4 | PI4Outgoing | python3 consumer.py 4 9293 COUNT |
+| AC Route (Type B/C) | 2 | 5 | PI5Outgoing | python3 consumer.py 5 9293 COUNT |
+| SPT | 3 | 7 | PI7Outgoing | python3 consumer.py 7 9293 COUNT |
+| Live Operations | 4 | 8 | PI8Outgoing (INACTIVE) | python3 consumer.py 8 9293 COUNT |
 
 ### Consumer Arguments
 
