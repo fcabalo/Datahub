@@ -29,7 +29,7 @@ services:
       - ./../data:/usr/data
 
   adapter-2:
-    image: docker.io/fcabalo/adapter-app:latest
+    image: adapter-app:latest
     container_name: adapter-app-2
     ports:
       - 9294:9293
