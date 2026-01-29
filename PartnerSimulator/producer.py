@@ -4,25 +4,38 @@ import os
 import random
 import string
 import requests
+import logging			  
 from datetime import datetime
 
-def generate_message(template, index, recipient):
-	partners = {1,2}
-	formats = {'A','B','C'}
+logging.basicConfig(
+	level=logging.INFO,
+	format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+
+log = logging.getLogger(__name__)					
+def generate_message(template, index, msgType, recipient):
+	partnerInterfaces = {3,6}
+	partners = {1,2,3}
+	types = {'A','B','C'}
 	
-	source = str(random.choice(list(partners)))
-	destination = None
-	formatType = ''
-	if recipient == '-':
-		formatType = str(random.choice(list(formats)))
-	elif recipient.isdigit():
-		destination = recipient
-		formatType = str(random.choice(list(formats)))
+	source = str(random.choice(list(partnerInterfaces)))
+	messageType = ''
+	
+	if msgType == '-':
+		messageType = str(random.choice(list(types)))
 	else:
-		formatType = recipient
+		messageType = msgType
+	
+	if recipient == '-':
+		destination = None
+	elif recipient == '0':
+		destination = str(random.choice(list(partners)))
+	else:
+		destination = recipient
 		
 	timestamp = datetime.now().timestamp()
 	
+	log.debug("Generating message: index=%d, messageType=%s, destination=%d", index, messageType, destination)																		
 	root = ET.fromstring(template)
 	
 	header = root.find('header')
@@ -30,7 +43,7 @@ def generate_message(template, index, recipient):
 	headerRep = {
 		"source": source,
 		"destination": destination,
-		"formatType": formatType
+		"messageType": messageType
 	}
 	
 	replacements = {
@@ -39,18 +52,23 @@ def generate_message(template, index, recipient):
 	
 	for tag, newValue in headerRep.items():
 		for elem in header.iter(tag):
-			elem.text = str(newValue)
+			if newValue is None:
+				header.remove(elem)
+			else:
+				elem.text = str(newValue)
 			
 	for tag, newValue in replacements.items():
 		for elem in root.iter(tag):
 			elem.text = str(newValue)
 			
+	log.debug("Generated message: source=%s, messageType=%s", headerRep["source"], headerRep["messageType"])																										 
 	return ET.tostring(root,encoding='unicode')
 	
 def send_message(xmlMessage):
 	headers = {'Content-Type': 'application/xml'}
-	url = 'http://localhost:8080/datahub/'
+	url = 'http://localhost:8080/datahub'
 	
+	log.debug("Sending message to %s", url)									
 	try:
 		#print('Sending:' , xmlMessage)
 		
@@ -58,26 +76,32 @@ def send_message(xmlMessage):
 		
 		if response.status_code == 200:
 			posts = response.text
+			log.info("Message sent successfully")
+			log.debug("Response: %s", posts)							
 			return posts
 		else:
-			print('Error: ', response.status_code)
+			log.error("Failed to send message: status_code=%d", response.status_code)
 			return None
 	except requests.exceptions.RequestException as e:
-		print('Error:', e)
+		log.error("Request failed: %s", e)
 		return None
 		
 def open_template(input_file):
 	try:
 		with open(input_file, 'r') as file:
-			return file.read()
+			content = file.read()
+			log.debug("Template loaded successfully, length=%d", len(content))																			 
+			return content
 	except FileNotFoundError:
-		print("Error: The file was not found.")
+		log.error("Template file not found: %s", input_file)
 	except PermissionError:
-		print("Error: Permission denied while accessing the file.")
+		log.error("Permission denied accessing template: %s", input_file)
 	except Exception as e:
-		print(f"An unexpected error occurred: {e}")
+		log.error("Unexpected error loading template: %s", e)
 		
-def main(messageCount, recipient, xmlSource):
+def main(messageCount, messageType, destination, xmlSource):
+	log.info("Starting message generation: count=%s, messageType=%s, destination=%s, template=%s",
+			 messageCount, messageType, destination, xmlSource)								   
 	
 	#print('Count: ', messageCount)
 	#print('Template Source:', xmlSource)
@@ -88,10 +112,11 @@ def main(messageCount, recipient, xmlSource):
 	
 	
 	for x in range(int(messageCount)):
-		message = generate_message(rawTemplate, x, recipient)
-		print(message)
+		log.info("Processing message %d of %s", x + 1, messageCount)
+		message = generate_message(rawTemplate, x, messageType, destination)
+		log.debug("Message content: %s", message)
 		posts = send_message(message)
-		print('Sent:', posts)
+		log.debug('Sent: {}', posts)
 	
 	
 if __name__=='__main__':
@@ -102,14 +127,18 @@ if __name__=='__main__':
 		messageCount = 1
 		
 	try:
-		recipient = sys.argv[2]
+		messageType = sys.argv[2]
 	except IndexError:
-		recipient = '-'
+		messageType = '-'
 		
 	try:
-		messageTemplate = sys.argv[3]
+		destination = sys.argv[3]
 	except IndexError:
-		messageTemplate = 'templates/default.xml'	
+		destination = '-'
+		
+	messageTemplate = 'templates/default.xml'	
+	log.info("Application started with args: count=%s, messageType=%s, destination=%s, template=%s",
+			 messageCount, messageType, destination, messageTemplate)
 	
-	main(messageCount, recipient, messageTemplate)
+	main(messageCount, messageType, destination, messageTemplate)
 

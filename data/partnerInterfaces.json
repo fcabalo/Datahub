@@ -1,0 +1,63 @@
+[
+	{
+		"id": 1,
+		"partnerId": 1,
+		"interfaceType": "DEFAULT",
+		"region": "Berlin",
+		"direction": "INCOMING"
+	},
+	{
+		"id": 2,
+		"partnerId": 1,
+		"interfaceType": "DEFAULT",
+		"region": "Berlin",
+		"direction": "OUTGOING"
+	},
+	{
+		"id": 3,
+		"partnerId": 2,
+		"interfaceType": "RESTAPI",
+		"region": "Hesse",
+		"direction": "INCOMING"
+	},
+	{
+		"id": 4,
+		"partnerId": 2,
+		"interfaceType": "TCPIP",
+		"region": "Hesse",
+		"direction": "OUTGOING",
+		"formatType": "UIC"
+	},
+	{
+		"id": 5,
+		"partnerId": 2,
+		"direction": "OUTGOING",
+		"interfaceType": "TCPIP",
+		"formatType": "UIC",
+		"region": "Hesse"
+	},
+	{
+		"id": 6,
+		"partnerId": 3,
+		"interfaceType": "RESTAPI",
+		"region": "Berlin",
+		"direction": "INCOMING"
+	},
+	{
+		"id": 7,
+		"partnerId": 3,
+		"interfaceType": "TCPIP",
+		"region": "Berlin",
+		"formatType": "UIC",
+		"direction": "OUTGOING"
+	},
+	{
+		"id": 8,
+		"partnerId": 4,
+		"interfaceType": "TCPIP",
+		"region": "Hesse",
+		"formatType": "TAF/TAP",
+		"direction": "OUTGOING",
+		"status": "INACTIVE"
+	}
+]
