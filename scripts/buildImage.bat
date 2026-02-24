@@ -1,13 +1,13 @@
 @echo off
 
-set dp=podman
-where podman
+set dp=docker
+where docker
 if %ERRORLEVEL%==0 (
-	set dp=podman
+	set dp=docker
 ) else (
-	where docker
+	where podman
 	if %ERRORLEVEL%==0 (
-		set dp=docker
+		set dp=podman
 	) else (
 		echo Error: docker or podman is not installed.
 		exit
